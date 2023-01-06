@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.0)
+project(WeChatPlantForm)
+add_subdirectory(WeChatMsgHttpServer)
+add_subdirectory(WXManager)
+#add_subdirectory(UnitTest)
+#add_subdirectory(HTTP_Test)
