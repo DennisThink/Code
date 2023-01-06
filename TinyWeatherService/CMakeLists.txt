@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.0)
+project(TinyWeatherService)
+add_subdirectory(WeatherService)
+add_subdirectory(WeatherSpider)
+#add_subdirectory(UnitTest)
+#add_subdirectory(HTTP_Test)
