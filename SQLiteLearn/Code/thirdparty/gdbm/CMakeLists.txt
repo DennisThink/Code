@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.0)
+project(gdbm)
+include_directories(./include/)
+aux_source_directory(./src/ GDBM_LIB_SOURCE)
+add_library(gdbm ${GDBM_LIB_SOURCE})
