@@ -1,6 +1,7 @@
 #include "CClientSmtpProto.h"
 #include "ProtoUtil.h"
 #include <algorithm>
+#include <iostream>
 namespace cpp_email
 {
 std::string CClientSmtpProto::GetSend()
@@ -20,16 +21,16 @@ std::string CClientSmtpProto::GetSend()
     break;
     case SEND_USER_NAME:
     {
-        return CProtoUtil::Base64Encode("dennismi@163.com") + "\r\n";
+        return m_strUserName+ "\r\n";
     }
     break;
     case SEND_PASSWORD:
     {
-        return CProtoUtil::Base64Encode("srpPr9MXwp285Su") + "\r\n";
+        return m_strPassword + "\r\n";
     }break;
     case SEND_MAIL_FROM:
     {
-        return "MAIL FROM: <dennismi@163.com>\r\n";
+        return "MAIL FROM: <"+m_strEmailAddr+">\r\n";
     }break;
     case SEND_MAIL_TO:
     {
@@ -41,12 +42,18 @@ std::string CClientSmtpProto::GetSend()
     }break;
     case SEND_DATA_BODY:
     {
-        return std::string("Subject:Design Plan\r\n")+
-               std::string("From:""<dennismi@163.com>\r\n")+
-               std::string("To:""<dennismi1024@gmail.com>\r\n")+
-               std::string("\r\n")+
-               std::string("我是米小，你有什么问题吗\r\n")+
-               std::string("\r\n.\r\n");
+        std::string strResult;
+        {
+            strResult += "Subject:Design Plan\r\n";
+            strResult += "From: <";
+            strResult += m_strEmailAddr;
+            strResult += ">\r\n";
+            strResult += "To: ""<dennismi1024@gmail.com>\r\n";
+            strResult += "\r\n";
+            strResult += "我是米小，你有什么问题吗\r\n";
+            strResult += "\r\n.\r\n";
+        }
+        return strResult;
     }break;
     case SEND_DATA_TAIL:
     {
@@ -60,6 +67,15 @@ std::string CClientSmtpProto::GetSend()
     }
 }
 
+void CClientSmtpProto::Init(const std::string& strUserName, const std::string& strPassword)
+{
+    m_strEmailAddr = strUserName;
+    std::size_t index = strUserName.find_first_of("@");
+    m_strUserName = strUserName.substr(0, index);
+    m_strUserName = CProtoUtil::Base64Encode(m_strUserName);
+    m_strSmtpAddr = "smtp." + strUserName.substr(index + 1);
+    m_strPassword = CProtoUtil::Base64Encode(strPassword);
+}
 bool CClientSmtpProto::OnRecv(const std::string &strRecv)
 {
     std::vector<std::string> strArray = CProtoUtil::SplitStringByLine(strRecv);

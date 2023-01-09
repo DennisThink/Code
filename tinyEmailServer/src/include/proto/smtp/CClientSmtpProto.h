@@ -8,7 +8,7 @@ namespace cpp_email
     class CClientSmtpProto:public CEmailProtoInterface
     {
     public:
-        explicit CClientSmtpProto(){m_step = SMTP_STEP_BEGIN;m_bAuthFinish = false;}
+        explicit CClientSmtpProto(const std::string strUserName, const std::string strPassword) { Init(strUserName,strPassword); m_step = SMTP_STEP_BEGIN; m_bAuthFinish = false; }
         virtual ~CClientSmtpProto()=default;
         virtual bool OnRecv(const std::string& strRecv) override;
         virtual std::string GetSend() override;
@@ -16,10 +16,15 @@ namespace cpp_email
         bool SendMail();
         virtual bool IsFinish() override { return false;}
     private:
+        void Init(const std::string& strUserName,const std::string& strPassword);
         Smtp_Step_t GetNextCmd(const Smtp_Step_t curStep,const ProtoCode_t code);
         std::vector<CSmtpProtoCmd> m_recvCmdVec;
         Smtp_Step_t m_step;
         bool m_bAuthFinish;
+        std::string m_strEmailAddr;
+        std::string m_strSmtpAddr;
+        std::string m_strUserName;
+        std::string m_strPassword;
     };
 }
 #endif
