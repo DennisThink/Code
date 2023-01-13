@@ -158,10 +158,10 @@ void *SysGetTlsKeyData(SYS_TLSKEY &TlsKey);
 
 void SysThreadOnce(SYS_THREAD_ONCE *pThrOnce, void (*pOnceProc) (void));
 
-void *SysAllocNZ(unsigned int uSize);
+/*void* SysAllocNZ(unsigned int uSize);
 void *SysAlloc(unsigned int uSize);
 void SysFree(void *pData);
-void *SysRealloc(void *pData, unsigned int uSize);
+void *SysRealloc(void *pData, unsigned int uSize);*/
 
 int SysLockFile(char const *pszFileName, char const *pszLockExt = ".lock");
 int SysUnlockFile(char const *pszFileName, char const *pszLockExt = ".lock");

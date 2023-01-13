@@ -70,9 +70,9 @@ static char *SvrGetProfileFilePath(char *pszFilePath, int iMaxPath)
 
 static void SvrFreeConfigVar(ServerInfoVar *pSIV)
 {
-	SysFree(pSIV->HN.Key.pData);
-	SysFree(pSIV->pszValue);
-	SysFree(pSIV);
+	SysUtil::SysFree(pSIV->HN.Key.pData);
+	SysUtil::SysFree(pSIV->pszValue);
+	SysUtil::SysFree(pSIV);
 }
 
 static void SvrHFreeConfigVar(void *pPrivate, HashNode *pHN)
@@ -87,7 +87,7 @@ static ServerInfoVar *SvrAllocVar(const char *pszName, const char *pszValue)
 	char *pszDName;
 	ServerInfoVar *pSIV;
 
-	if ((pSIV = (ServerInfoVar *) SysAlloc(sizeof(ServerInfoVar))) == NULL)
+	if ((pSIV = (ServerInfoVar *) SysUtil::SysAlloc(sizeof(ServerInfoVar))) == NULL)
 		return NULL;
 	HashInitNode(&pSIV->HN);
 	pszDName = SysStrDup(pszName);
@@ -157,7 +157,7 @@ static ServerConfigData *SvrAllocConfig(RLCK_HANDLE hResLock, int iWriteLock,
 	ServerConfigData *pSCD;
 	HashOps HOps;
 
-	if ((pSCD = (ServerConfigData *) SysAlloc(sizeof(ServerConfigData))) == NULL)
+	if ((pSCD = (ServerConfigData *) SysUtil::SysAlloc(sizeof(ServerConfigData))) == NULL)
 		return NULL;
 	pSCD->hResLock = hResLock;
 	pSCD->iWriteLock = iWriteLock;
@@ -167,12 +167,12 @@ static ServerConfigData *SvrAllocConfig(RLCK_HANDLE hResLock, int iWriteLock,
 	HOps.pCompare = MscStringCompareCB;
 	if ((pSCD->hHash = HashCreate(&HOps,
 				      SVR_CFGHASH_INITSIZE)) == INVALID_HASH_HANDLE) {
-		SysFree(pSCD);
+		SysUtil::SysFree(pSCD);
 		return NULL;
 	}
 	if (SvrReadConfig(pSCD->hHash, pszProfilePath) < 0) {
 		HashFree(pSCD->hHash, SvrHFreeConfigVar, NULL);
-		SysFree(pSCD);
+		SysUtil::SysFree(pSCD);
 		return NULL;
 	}
 
@@ -218,7 +218,7 @@ void SvrReleaseConfigHandle(SVRCFG_HANDLE hSvrConfig)
 	else
 		RLckUnlockSH(pSCD->hResLock);
 	HashFree(pSCD->hHash, SvrHFreeConfigVar, NULL);
-	SysFree(pSCD);
+	SysUtil::SysFree(pSCD);
 }
 
 char *SvrGetConfigVar(SVRCFG_HANDLE hSvrConfig, const char *pszName, const char *pszDefault)
@@ -264,12 +264,12 @@ static int SvrWriteConfig(HASH_HANDLE hHash, FILE *pFile)
 						  '"')) == NULL)
 				return ErrGetErrorCode();
 			fprintf(pFile, "%s\t", pszQuoted);
-			SysFree(pszQuoted);
+			SysUtil::SysFree(pszQuoted);
 
 			if ((pszQuoted = StrQuote(pSIV->pszValue, '"')) == NULL)
 				return ErrGetErrorCode();
 			fprintf(pFile, "%s\n", pszQuoted);
-			SysFree(pszQuoted);
+			SysUtil::SysFree(pszQuoted);
 		} while (HashNext(hHash, &HEnum, &pHNode) == 0);
 	}
 
@@ -392,7 +392,7 @@ int SvrConfigVar(const char *pszVarName, char *pszVarValue, int iMaxVarValue,
 	strncpy(pszVarValue, pszValue, iMaxVarValue - 1);
 	pszVarValue[iMaxVarValue - 1] = '\0';
 
-	SysFree(pszValue);
+	SysUtil::SysFree(pszValue);
 	if (iReleaseConfig)
 		SvrReleaseConfigHandle(hSvrConfig);
 

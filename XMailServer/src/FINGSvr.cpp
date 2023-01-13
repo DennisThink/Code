@@ -76,7 +76,7 @@ static FINGConfig *FINGGetConfigCopy(SHB_HANDLE hShbFING)
 	if (pFINGCfg == NULL)
 		return NULL;
 
-	FINGConfig *pFINGCfgCopy = (FINGConfig *) SysAlloc(sizeof(FINGConfig));
+	FINGConfig *pFINGCfgCopy = (FINGConfig *)SysUtil::SysAlloc(sizeof(FINGConfig));
 
 	if (pFINGCfgCopy != NULL)
 		memcpy(pFINGCfgCopy, pFINGCfg, sizeof(FINGConfig));
@@ -185,8 +185,8 @@ static int FINGDumpUser(char const *pszUser, char const *pszDomain,
 
 			BSckSendString(hBSock, szRespBuffer, pFINGCfg->iTimeout);
 
-			SysFree(pszRealName);
-			SysFree(pszHomePage);
+			SysUtil::SysFree(pszRealName);
+			SysUtil::SysFree(pszHomePage);
 		} else {
 			/* Local mailing list case */
 
@@ -289,7 +289,7 @@ static int FINGHandleSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock)
 	if (SysGetPeerInfo(BSckGetAttachedSocket(hBSock), PeerInfo) < 0) {
 		ErrorPush();
 		BSckSendString(hBSock, ErrGetErrorString(ErrorFetch()), pFINGCfg->iTimeout);
-		SysFree(pFINGCfg);
+		SysUtil::SysFree(pFINGCfg);
 
 		SysLogMessage(LOG_LEV_ERROR, "%s\n", ErrGetErrorString(ErrorFetch()));
 		return ErrorPop();
@@ -302,7 +302,7 @@ static int FINGHandleSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock)
 			   sizeof(szSvrFQDN)) < 0) {
 		ErrorPush();
 		BSckSendString(hBSock, ErrGetErrorString(ErrorFetch()), pFINGCfg->iTimeout);
-		SysFree(pFINGCfg);
+		SysUtil::SysFree(pFINGCfg);
 
 		SysLogMessage(LOG_LEV_ERROR, "%s\n", ErrGetErrorString(ErrorFetch()));
 		return ErrorPop();
@@ -337,7 +337,7 @@ static int FINGHandleSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock)
 		if (hSvrConfig != INVALID_SVRCFG_HANDLE)
 			SvrReleaseConfigHandle(hSvrConfig);
 	}
-	SysFree(pFINGCfg);
+	SysUtil::SysFree(pFINGCfg);
 
 	SysLogMessage(LOG_LEV_MESSAGE, "FINGER client exit [%s]\n",
 		      SysInetNToA(PeerInfo, szIP, sizeof(szIP)));
@@ -354,7 +354,7 @@ unsigned int FINGClientThread(void *pThreadData)
 		ErrorPush();
 		SysLogMessage(LOG_LEV_ERROR, "%s\n", ErrGetErrorString());
 		SysCloseSocket(pThCtx->SockFD);
-		SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -364,7 +364,7 @@ unsigned int FINGClientThread(void *pThreadData)
 	if (hBSock == INVALID_BSOCK_HANDLE) {
 		ErrorPush();
 		SysCloseSocket(pThCtx->SockFD);
-		SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -379,7 +379,7 @@ unsigned int FINGClientThread(void *pThreadData)
 		if (CSslBindSetup(&SSLB) < 0) {
 			ErrorPush();
 			BSckDetach(hBSock, 1);
-			SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 			return ErrorPop();
 		}
 		ZeroData(SslE);
@@ -390,15 +390,15 @@ unsigned int FINGClientThread(void *pThreadData)
 		if (iError < 0) {
 			ErrorPush();
 			BSckDetach(hBSock, 1);
-			SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 			return ErrorPop();
 		}
 		/*
 		 * We may want to add verify code here ...
 		 */
 
-		SysFree(SslE.pszIssuer);
-		SysFree(SslE.pszSubject);
+	SysUtil::SysFree(SslE.pszIssuer);
+	SysUtil::SysFree(SslE.pszSubject);
 	}
 	/* Increase threads count */
 	FINGConfig *pFINGCfg = (FINGConfig *) ShbLock(pThCtx->pThCfg->hThShb);
@@ -407,7 +407,7 @@ unsigned int FINGClientThread(void *pThreadData)
 		ErrorPush();
 		SysLogMessage(LOG_LEV_ERROR, "%s\n", ErrGetErrorString());
 		BSckDetach(hBSock, 1);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 	++pFINGCfg->lThreadCount;
@@ -429,7 +429,7 @@ unsigned int FINGClientThread(void *pThreadData)
 
 	/* Unlink socket from the bufferer and close it */
 	BSckDetach(hBSock, 1);
-	SysFree(pThCtx);
+SysUtil::SysFree(pThCtx);
 
 	return 0;
 }

@@ -30,7 +30,9 @@
 #include "BuffSock.h"
 #include "MiscUtils.h"
 #include "TabIndex.h"
-
+//DennisThink
+#include "SysUtil.h"
+//
 /*
  * The index version MUST be incremented at every file format change!
  */
@@ -141,10 +143,10 @@ static int TbixFreeHash(TabHashNode *pHash, int iHashSize)
 		while ((pPos = SYS_LIST_FIRST(pHead)) != NULL) {
 			pHL = SYS_LIST_ENTRY(pPos, TabHashLink, Lnk);
 			SYS_LIST_DEL(&pHL->Lnk);
-			SysFree(pHL);
+		SysUtil::SysFree(pHL);
 		}
 	}
-	SysFree(pHash);
+SysUtil::SysFree(pHash);
 
 	return 0;
 }
@@ -176,7 +178,7 @@ int TbixCreateIndex(char const *pszTabFilePath, int const *piFieldsIdx, bool bCa
 	iHashSize = TbixCalcHashSize(pTabFile, szLnBuff, sizeof(szLnBuff));
 
 	/* Alloc and init hash records */
-	if ((pHash = (TabHashNode *) SysAlloc(iHashSize * sizeof(TabHashNode))) == NULL) {
+	if ((pHash = (TabHashNode *)SysUtil::SysAlloc(iHashSize * sizeof(TabHashNode))) == NULL) {
 		fclose(pTabFile);
 		return ErrGetErrorCode();
 	}
@@ -202,7 +204,7 @@ int TbixCreateIndex(char const *pszTabFilePath, int const *piFieldsIdx, bool bCa
 			int iHashIndex = (int) (ulHashVal % (unsigned int) iHashSize);
 			TabHashLink *pHL;
 
-			if ((pHL = (TabHashLink *) SysAlloc(sizeof(TabHashLink))) == NULL) {
+			if ((pHL = (TabHashLink *)SysUtil::SysAlloc(sizeof(TabHashLink))) == NULL) {
 				StrFreeStrings(ppszToks);
 				TbixFreeHash(pHash, iHashSize);
 				fclose(pTabFile);
@@ -423,12 +425,12 @@ static TabIdxUINT *TbixReadTable(TabHashIndex &THI, unsigned long ulHashVal)
 		return NULL;
 	}
 	if ((pOffTbl = (TabIdxUINT *)
-	     SysAlloc((uTableSize + 1) * sizeof(TabIdxUINT))) == NULL)
+	    SysUtil::SysAlloc((uTableSize + 1) * sizeof(TabIdxUINT))) == NULL)
 		return NULL;
 	pOffTbl[0] = uTableSize;
 	if (!fread(&pOffTbl[1], uTableSize * sizeof(TabIdxUINT), 1,
 		   THI.pIdxFile)) {
-		SysFree(pOffTbl);
+	SysUtil::SysFree(pOffTbl);
 		ErrSetErrorCode(ERR_FILE_READ);
 		return NULL;
 	}
@@ -488,7 +490,7 @@ char **TbixLookup(char const *pszTabFilePath, int const *piFieldsIdx, bool bCase
 
 	/* Search for the matched one */
 	if ((pTabFile = fopen(pszTabFilePath, "rb")) == NULL) {
-		SysFree(pHashTable);
+	SysUtil::SysFree(pHashTable);
 		ErrSetErrorCode(ERR_FILE_OPEN, pszTabFilePath);
 		return NULL;
 	}
@@ -503,13 +505,13 @@ char **TbixLookup(char const *pszTabFilePath, int const *piFieldsIdx, bool bCase
 				if (bCaseSens) {
 					if (strcmp(szKey, szRefKey) == 0) {
 						fclose(pTabFile);
-						SysFree(pHashTable);
+					SysUtil::SysFree(pHashTable);
 						return ppszToks;
 					}
 				} else {
 					if (stricmp(szKey, szRefKey) == 0) {
 						fclose(pTabFile);
-						SysFree(pHashTable);
+					SysUtil::SysFree(pHashTable);
 						return ppszToks;
 					}
 				}
@@ -518,7 +520,7 @@ char **TbixLookup(char const *pszTabFilePath, int const *piFieldsIdx, bool bCase
 		}
 	}
 	fclose(pTabFile);
-	SysFree(pHashTable);
+SysUtil::SysFree(pHashTable);
 
 	ErrSetErrorCode(ERR_RECORD_NOT_FOUND);
 
@@ -570,7 +572,7 @@ INDEX_HANDLE TbixOpenHandle(char const *pszTabFilePath, int const *piFieldsIdx,
 
 		if (pHashTable != NULL) {
 			if (ArrayAppend(hArray, pHashTable) < 0) {
-				SysFree(pHashTable);
+			SysUtil::SysFree(pHashTable);
 				ArrayFree(hArray, MscSysFreeCB, NULL);
 				TbixCloseIndex(THI);
 				return INVALID_INDEX_HANDLE;
@@ -592,7 +594,7 @@ INDEX_HANDLE TbixOpenHandle(char const *pszTabFilePath, int const *piFieldsIdx,
 		return INVALID_INDEX_HANDLE;
 	}
 	/* Setup lookup struct */
-	if ((pILD = (IndexLookupData *) SysAlloc(sizeof(IndexLookupData))) == NULL) {
+	if ((pILD = (IndexLookupData *)SysUtil::SysAlloc(sizeof(IndexLookupData))) == NULL) {
 		fclose(pTabFile);
 		ArrayFree(hArray, MscSysFreeCB, NULL);
 		return INVALID_INDEX_HANDLE;
@@ -610,7 +612,7 @@ int TbixCloseHandle(INDEX_HANDLE hIndexLookup)
 
 	fclose(pILD->pTabFile);
 	ArrayFree(pILD->hArray, MscSysFreeCB, NULL);
-	SysFree(pILD);
+SysUtil::SysFree(pILD);
 
 	return 0;
 }

@@ -221,7 +221,7 @@ UserType UsrGetUserType(UserInfo *pUI)
 UserInfo *UsrCreateDefaultUser(char const *pszDomain, char const *pszName,
 			       char const *pszPassword, UserType TypeUser)
 {
-	UserInfo *pUI = (UserInfo *) SysAlloc(sizeof(UserInfo));
+	UserInfo *pUI = (UserInfo *)SysUtil::SysAlloc(sizeof(UserInfo));
 
 	if (pUI == NULL)
 		return NULL;
@@ -243,7 +243,7 @@ UserInfo *UsrCreateDefaultUser(char const *pszDomain, char const *pszName,
 
 static UserInfoVar *UsrAllocVar(char const *pszName, char const *pszValue)
 {
-	UserInfoVar *pUIV = (UserInfoVar *) SysAlloc(sizeof(UserInfoVar));
+	UserInfoVar *pUIV = (UserInfoVar *)SysUtil::SysAlloc(sizeof(UserInfoVar));
 
 	if (pUIV == NULL)
 		return NULL;
@@ -257,9 +257,9 @@ static UserInfoVar *UsrAllocVar(char const *pszName, char const *pszValue)
 
 static void UsrFreeVar(UserInfoVar *pUIV)
 {
-	SysFree(pUIV->pszName);
-	SysFree(pUIV->pszValue);
-	SysFree(pUIV);
+SysUtil::SysFree(pUIV->pszName);
+SysUtil::SysFree(pUIV->pszValue);
+SysUtil::SysFree(pUIV);
 }
 
 static int UsrLoadUserInfo(HSLIST &InfoList, unsigned int uUserID, char const *pszFilePath)
@@ -319,7 +319,7 @@ static UserInfo *UsrGetUserFromStrings(char **ppszStrings, int iLoadUCfg)
 	if (StrDeCrypt(ppszStrings[usrPassword], szPassword) == NULL)
 		return NULL;
 
-	UserInfo *pUI = (UserInfo *) SysAlloc(sizeof(UserInfo));
+	UserInfo *pUI = (UserInfo *)SysUtil::SysAlloc(sizeof(UserInfo));
 
 	if (pUI == NULL)
 		return NULL;
@@ -370,12 +370,12 @@ void UsrFreeUserInfo(UserInfo *pUI)
 {
 	UsrFreeInfoList(pUI->InfoList);
 
-	SysFree(pUI->pszDomain);
-	SysFree(pUI->pszPassword);
-	SysFree(pUI->pszName);
-	SysFree(pUI->pszPath);
-	SysFree(pUI->pszType);
-	SysFree(pUI);
+SysUtil::SysFree(pUI->pszDomain);
+SysUtil::SysFree(pUI->pszPassword);
+SysUtil::SysFree(pUI->pszName);
+SysUtil::SysFree(pUI->pszPath);
+SysUtil::SysFree(pUI->pszType);
+SysUtil::SysFree(pUI);
 }
 
 char *UsrGetUserInfoVar(UserInfo *pUI, char const *pszName, char const *pszDefault)
@@ -414,7 +414,7 @@ int UsrSetUserInfoVar(UserInfo *pUI, char const *pszName, char const *pszValue)
 	UserInfoVar *pUIV = UsrGetUserVar(pUI->InfoList, pszName);
 
 	if (pUIV != NULL) {
-		SysFree(pUIV->pszValue);
+	SysUtil::SysFree(pUIV->pszValue);
 		pUIV->pszValue = SysStrDup(pszValue);
 	} else {
 		if ((pUIV = UsrAllocVar(pszName, pszValue)) == NULL)
@@ -429,7 +429,7 @@ int UsrSetUserInfoVar(UserInfo *pUI, char const *pszName, char const *pszValue)
 char **UsrGetProfileVars(UserInfo *pUI)
 {
 	int iVarsCount = ListGetCount(pUI->InfoList);
-	char **ppszVars = (char **) SysAlloc((iVarsCount + 1) * sizeof(char *));
+	char **ppszVars = (char **)SysUtil::SysAlloc((iVarsCount + 1) * sizeof(char *));
 
 	if (ppszVars == NULL)
 		return NULL;
@@ -460,7 +460,7 @@ static int UsrWriteInfoList(HSLIST &InfoList, FILE *pProfileFile)
 
 		fprintf(pProfileFile, "%s\t", pszQuoted);
 
-		SysFree(pszQuoted);
+	SysUtil::SysFree(pszQuoted);
 
 		/* Write variabile value */
 		pszQuoted = StrQuote(pUIV->pszValue, '"');
@@ -470,7 +470,7 @@ static int UsrWriteInfoList(HSLIST &InfoList, FILE *pProfileFile)
 
 		fprintf(pProfileFile, "%s\n", pszQuoted);
 
-		SysFree(pszQuoted);
+	SysUtil::SysFree(pszQuoted);
 	}
 
 	return 0;
@@ -641,7 +641,7 @@ static int UsrWriteAlias(FILE *pAlsFile, AliasInfo *pAI)
 
 	fprintf(pAlsFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Alias */
 	pszQuoted = StrQuote(pAI->pszAlias, '"');
@@ -651,7 +651,7 @@ static int UsrWriteAlias(FILE *pAlsFile, AliasInfo *pAI)
 
 	fprintf(pAlsFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Account name */
 	pszQuoted = StrQuote(pAI->pszName, '"');
@@ -661,14 +661,14 @@ static int UsrWriteAlias(FILE *pAlsFile, AliasInfo *pAI)
 
 	fprintf(pAlsFile, "%s\n", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	return 0;
 }
 
 AliasInfo *UsrAllocAlias(char const *pszDomain, char const *pszAlias, char const *pszName)
 {
-	AliasInfo *pAI = (AliasInfo *) SysAlloc(sizeof(AliasInfo));
+	AliasInfo *pAI = (AliasInfo *)SysUtil::SysAlloc(sizeof(AliasInfo));
 
 	if (pAI == NULL)
 		return NULL;
@@ -682,10 +682,10 @@ AliasInfo *UsrAllocAlias(char const *pszDomain, char const *pszAlias, char const
 
 void UsrFreeAlias(AliasInfo *pAI)
 {
-	SysFree(pAI->pszDomain);
-	SysFree(pAI->pszAlias);
-	SysFree(pAI->pszName);
-	SysFree(pAI);
+SysUtil::SysFree(pAI->pszDomain);
+SysUtil::SysFree(pAI->pszAlias);
+SysUtil::SysFree(pAI->pszName);
+SysUtil::SysFree(pAI);
 }
 
 int UsrAddAlias(AliasInfo *pAI)
@@ -1150,7 +1150,7 @@ static int UsrWriteUser(UserInfo *pUI, FILE *pUsrFile)
 
 	fprintf(pUsrFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Name */
 	pszQuoted = StrQuote(pUI->pszName, '"');
@@ -1160,7 +1160,7 @@ static int UsrWriteUser(UserInfo *pUI, FILE *pUsrFile)
 
 	fprintf(pUsrFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Password */
 	char szPassword[512];
@@ -1174,7 +1174,7 @@ static int UsrWriteUser(UserInfo *pUI, FILE *pUsrFile)
 
 	fprintf(pUsrFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* UserID */
 	fprintf(pUsrFile, "%u\t", pUI->uUserID);
@@ -1187,7 +1187,7 @@ static int UsrWriteUser(UserInfo *pUI, FILE *pUsrFile)
 
 	fprintf(pUsrFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* User type */
 	pszQuoted = StrQuote(pUI->pszType, '"');
@@ -1197,7 +1197,7 @@ static int UsrWriteUser(UserInfo *pUI, FILE *pUsrFile)
 
 	fprintf(pUsrFile, "%s\n", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	return 0;
 }
@@ -1733,7 +1733,7 @@ int UsrGetDBFileSnapShot(char const *pszFileName)
 
 USRF_HANDLE UsrOpenDB(void)
 {
-	UsersDBScanData *pUDBSD = (UsersDBScanData *) SysAlloc(sizeof(UsersDBScanData));
+	UsersDBScanData *pUDBSD = (UsersDBScanData *)SysUtil::SysAlloc(sizeof(UsersDBScanData));
 
 	if (pUDBSD == NULL)
 		return INVALID_USRF_HANDLE;
@@ -1741,13 +1741,13 @@ USRF_HANDLE UsrOpenDB(void)
 	UsrGetTmpFile(NULL, pUDBSD->szTmpDBFile, sizeof(pUDBSD->szTmpDBFile));
 
 	if (UsrGetDBFileSnapShot(pUDBSD->szTmpDBFile) < 0) {
-		SysFree(pUDBSD);
+	SysUtil::SysFree(pUDBSD);
 		return INVALID_USRF_HANDLE;
 	}
 
 	if ((pUDBSD->pDBFile = fopen(pUDBSD->szTmpDBFile, "rt")) == NULL) {
 		SysRemove(pUDBSD->szTmpDBFile);
-		SysFree(pUDBSD);
+	SysUtil::SysFree(pUDBSD);
 		return INVALID_USRF_HANDLE;
 	}
 
@@ -1760,7 +1760,7 @@ void UsrCloseDB(USRF_HANDLE hUsersDB)
 
 	fclose(pUDBSD->pDBFile);
 	SysRemove(pUDBSD->szTmpDBFile);
-	SysFree(pUDBSD);
+SysUtil::SysFree(pUDBSD);
 }
 
 UserInfo *UsrGetFirstUser(USRF_HANDLE hUsersDB, int iLoadUCfg)
@@ -2086,19 +2086,19 @@ int UsrGetAliasDBFileSnapShot(char const *pszFileName)
 
 ALSF_HANDLE UsrAliasOpenDB(void)
 {
-	AliasDBScanData *pADBSD = (AliasDBScanData *) SysAlloc(sizeof(AliasDBScanData));
+	AliasDBScanData *pADBSD = (AliasDBScanData *)SysUtil::SysAlloc(sizeof(AliasDBScanData));
 
 	if (pADBSD == NULL)
 		return INVALID_ALSF_HANDLE;
 
 	UsrGetTmpFile(NULL, pADBSD->szTmpDBFile, sizeof(pADBSD->szTmpDBFile));
 	if (UsrGetAliasDBFileSnapShot(pADBSD->szTmpDBFile) < 0) {
-		SysFree(pADBSD);
+	SysUtil::SysFree(pADBSD);
 		return INVALID_ALSF_HANDLE;
 	}
 	if ((pADBSD->pDBFile = fopen(pADBSD->szTmpDBFile, "rt")) == NULL) {
 		SysRemove(pADBSD->szTmpDBFile);
-		SysFree(pADBSD);
+	SysUtil::SysFree(pADBSD);
 		return INVALID_ALSF_HANDLE;
 	}
 
@@ -2111,7 +2111,7 @@ void UsrAliasCloseDB(ALSF_HANDLE hAliasDB)
 
 	fclose(pADBSD->pDBFile);
 	SysRemove(pADBSD->szTmpDBFile);
-	SysFree(pADBSD);
+SysUtil::SysFree(pADBSD);
 }
 
 AliasInfo *UsrAliasGetFirst(ALSF_HANDLE hAliasDB)

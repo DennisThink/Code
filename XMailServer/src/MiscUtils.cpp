@@ -38,7 +38,9 @@
 #include "SSLMisc.h"
 #include "MailSvr.h"
 #include "MiscUtils.h"
-
+ //DennisThink
+#include "SysUtil.h"
+//
 #define IPPROP_LINE_MAX             1024
 #define SERVICE_ACCEPT_TIMEOUT      4000
 #define SERVICE_WAIT_SLEEP          2
@@ -62,7 +64,7 @@ struct FileScan {
 
 int MscDatumAlloc(Datum *pDm, void const *pData, long lSize)
 {
-	if ((pDm->pData = (char *) SysAllocNZ(lSize + 1)) == NULL)
+	if ((pDm->pData = (char *)SysUtil::SysAllocNZ(lSize + 1)) == NULL)
 		return ErrGetErrorCode();
 	memcpy(pDm->pData, pData, lSize);
 	pDm->pData[lSize] = 0;
@@ -73,12 +75,12 @@ int MscDatumAlloc(Datum *pDm, void const *pData, long lSize)
 
 LstDatum *MscLstDatumAlloc(void const *pData, long lSize)
 {
-	LstDatum *pLDm = (LstDatum *) SysAlloc(sizeof(LstDatum));
+	LstDatum *pLDm = (LstDatum *)SysUtil::SysAlloc(sizeof(LstDatum));
 
 	if (pLDm != NULL) {
 		SYS_INIT_LIST_HEAD(&pLDm->LLnk);
 		if (MscDatumAlloc(&pLDm->Data, pData, lSize) < 0) {
-			SysFree(pLDm);
+		SysUtil::SysFree(pLDm);
 			return NULL;
 		}
 	}
@@ -105,8 +107,8 @@ void MscFreeDatumList(SysListHead *pHead)
 		LstDatum *pLDm = SYS_LIST_ENTRY(pLLink, LstDatum, LLnk);
 
 		SYS_LIST_DEL(pLLink);
-		SysFree(pLDm->Data.pData);
-		SysFree(pLDm);
+	SysUtil::SysFree(pLDm->Data.pData);
+	SysUtil::SysFree(pLDm);
 	}
 }
 
@@ -292,9 +294,9 @@ void *MscLoadFile(char const *pszFilePath, unsigned long *pulFileSize)
 
 	/*
 	 * Alloc one extra byte to enable placing a '\0' to terminate an eventual
-	 * string representation and to avoid SysAlloc() to fail if ulFileSize == 0
+	 * string representation and to avoidSysUtil::SysAlloc() to fail if ulFileSize == 0
 	 */
-	if ((pFileData = SysAlloc(FileSize + 1)) == NULL) {
+	if ((pFileData =SysUtil::SysAlloc(FileSize + 1)) == NULL) {
 		fclose(pFile);
 		return NULL;
 	}
@@ -302,7 +304,7 @@ void *MscLoadFile(char const *pszFilePath, unsigned long *pulFileSize)
 	RdBytes = fread(pFileData, FileSize, 1, pFile);
 	fclose(pFile);
 	if (RdBytes != FileSize) {
-		SysFree(pFileData);
+	SysUtil::SysFree(pFileData);
 		ErrSetErrorCode(ERR_FILE_READ, pszFilePath);
 		return NULL;
 	}
@@ -447,17 +449,17 @@ FSCAN_HANDLE MscFirstFile(char const *pszPath, int iListDirs, char *pszFileName,
 	FileScan *pFS;
 	LstDatum *pLDm;
 
-	if ((pFS = (FileScan *) SysAlloc(sizeof(FileScan))) == NULL)
+	if ((pFS = (FileScan *)SysUtil::SysAlloc(sizeof(FileScan))) == NULL)
 		return INVALID_FSCAN_HANDLE;
 
 	SYS_INIT_LIST_HEAD(&pFS->FList);
 	if (MscGetFileList(pszPath, iListDirs, &pFS->FList) < 0) {
-		SysFree(pFS);
+	SysUtil::SysFree(pFS);
 		return INVALID_FSCAN_HANDLE;
 	}
 	if ((pFS->pPos = SYS_LIST_FIRST(&pFS->FList)) == NULL) {
 		MscFreeDatumList(&pFS->FList);
-		SysFree(pFS);
+	SysUtil::SysFree(pFS);
 		return INVALID_FSCAN_HANDLE;
 	}
 	pLDm = SYS_LIST_ENTRY(pFS->pPos, LstDatum, LLnk);
@@ -488,7 +490,7 @@ void MscCloseFindFile(FSCAN_HANDLE hFileScan)
 	FileScan *pFS = (FileScan *) hFileScan;
 
 	MscFreeDatumList(&pFS->FList);
-	SysFree(pFS);
+SysUtil::SysFree(pFS);
 }
 
 int MscGetFileList(char const *pszPath, int iListDirs, SysListHead *pHead)
@@ -1194,7 +1196,7 @@ int MscMD5Authenticate(char const *pszPassword, char const *pszTimeStamp, char c
 	if ((pszHash = StrSprint("%s%s", pszTimeStamp, pszPassword)) == NULL)
 		return ErrGetErrorCode();
 	do_md5_string(pszHash, strlen(pszHash), szMD5);
-	SysFree(pszHash);
+SysUtil::SysFree(pszHash);
 	if (stricmp(pszDigest, szMD5) != 0) {
 		ErrSetErrorCode(ERR_MD5_AUTH_FAILED);
 		return ERR_MD5_AUTH_FAILED;
@@ -1457,7 +1459,7 @@ int MscReplaceTokens(char **ppszTokens, char *(*pLkupProc)(void *, char const *,
 
 		if (pszRepl == NULL)
 			return ErrGetErrorCode();
-		SysFree(ppszTokens[i]);
+	SysUtil::SysFree(ppszTokens[i]);
 		ppszTokens[i] = pszRepl;
 	}
 
@@ -1492,7 +1494,7 @@ unsigned int MscServiceThread(void *pThreadData)
 		}
 		for (int i = 0; i < iNumConnSockFD; i++) {
 			SYS_THREAD hClientThread = SYS_INVALID_THREAD;
-			ThreadCreateCtx *pThCtx = (ThreadCreateCtx *) SysAlloc(sizeof(ThreadCreateCtx));
+			ThreadCreateCtx *pThCtx = (ThreadCreateCtx *)SysUtil::SysAlloc(sizeof(ThreadCreateCtx));
 
 			if (pThCtx != NULL) {
 				pThCtx->SockFD = ConnSockFD[i];
@@ -1502,7 +1504,7 @@ unsigned int MscServiceThread(void *pThreadData)
 			if (hClientThread != SYS_INVALID_THREAD)
 				SysCloseThread(hClientThread, 0);
 			else {
-				SysFree(pThCtx);
+			SysUtil::SysFree(pThCtx);
 				SysCloseSocket(ConnSockFD[i]);
 			}
 		}
@@ -1552,7 +1554,7 @@ int MscParseOptions(char const *pszOpts, int (*pfAssign)(void *, char const *, c
 
 void MscSysFreeCB(void *pPrivate, void *pData)
 {
-	SysFree(pData);
+SysUtil::SysFree(pData);
 }
 
 void MscRandomizeStringsOrder(char **ppszStrings)

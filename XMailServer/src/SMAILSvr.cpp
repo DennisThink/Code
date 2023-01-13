@@ -67,7 +67,7 @@ static SMAILConfig *SMAILGetConfigCopy(SHB_HANDLE hShbSMAIL)
 	if (pLMAILCfg == NULL)
 		return NULL;
 
-	SMAILConfig *pNewLMAILCfg = (SMAILConfig *) SysAlloc(sizeof(SMAILConfig));
+	SMAILConfig *pNewLMAILCfg = (SMAILConfig *)SysUtil::SysAlloc(sizeof(SMAILConfig));
 
 	if (pNewLMAILCfg != NULL)
 		memcpy(pNewLMAILCfg, pLMAILCfg, sizeof(SMAILConfig));
@@ -149,7 +149,7 @@ static int SMAILHandleResendNotify(SVRCFG_HANDLE hSvrConfig, QUEUE_HANDLE hQueue
 	int iNotifyResult = QueUtNotifyTempErrDelivery(hQueue, hMessage, hFSpool,
 						       NULL, pszText, NULL);
 
-	SysFree(pszText);
+SysUtil::SysFree(pszText);
 
 	return iNotifyResult;
 }
@@ -176,7 +176,7 @@ static int SMAILMailingListExplode(UserInfo *pUI, SPLF_HANDLE hFSpool)
 
 	if (hUsersDB == INVALID_USRML_HANDLE) {
 		ErrorPush();
-		SysFree(pszMLSender);
+	SysUtil::SysFree(pszMLSender);
 		return ErrorPop();
 	}
 	/* Mailing list scan */
@@ -189,7 +189,7 @@ static int SMAILMailingListExplode(UserInfo *pUI, SPLF_HANDLE hFSpool)
 
 			if (hMessage == INVALID_QMSG_HANDLE) {
 				ErrorPush();
-				SysFree(pszMLSender);
+			SysUtil::SysFree(pszMLSender);
 				UsrMLFreeUser(pMLUI);
 				UsrMLCloseDB(hUsersDB);
 				return ErrorPop();
@@ -206,7 +206,7 @@ static int SMAILMailingListExplode(UserInfo *pUI, SPLF_HANDLE hFSpool)
 				ErrorPush();
 				QueCleanupMessage(hSpoolQueue, hMessage);
 				QueCloseMessage(hSpoolQueue, hMessage);
-				SysFree(pszMLSender);
+			SysUtil::SysFree(pszMLSender);
 				UsrMLFreeUser(pMLUI);
 				UsrMLCloseDB(hUsersDB);
 				return ErrorPop();
@@ -216,7 +216,7 @@ static int SMAILMailingListExplode(UserInfo *pUI, SPLF_HANDLE hFSpool)
 				ErrorPush();
 				QueCleanupMessage(hSpoolQueue, hMessage);
 				QueCloseMessage(hSpoolQueue, hMessage);
-				SysFree(pszMLSender);
+			SysUtil::SysFree(pszMLSender);
 				UsrMLFreeUser(pMLUI);
 				UsrMLCloseDB(hUsersDB);
 				return ErrorPop();
@@ -225,7 +225,7 @@ static int SMAILMailingListExplode(UserInfo *pUI, SPLF_HANDLE hFSpool)
 		UsrMLFreeUser(pMLUI);
 	}
 	UsrMLCloseDB(hUsersDB);
-	SysFree(pszMLSender);
+SysUtil::SysFree(pszMLSender);
 
 	return 0;
 }
@@ -817,7 +817,7 @@ static int SMAILCmd_filter(SVRCFG_HANDLE hSvrConfig, SHB_HANDLE hShbSMAIL,
 					  !QueUtRemoveSpoolErrors());
 		else
 			QueCleanupMessage(hQueue, hMessage, false);
-		SysFree(pszRejMsg);
+	SysUtil::SysFree(pszRejMsg);
 
 		ErrSetErrorCode(ERR_FILTERED_MESSAGE);
 		return ERR_FILTERED_MESSAGE;
@@ -1502,7 +1502,7 @@ static int SMAILTryProcessSpool(SHB_HANDLE hShbSMAIL)
 
 			QueUtResendMessage(hSpoolQueue, hMessage, NULL);
 
-			SysFree(pSMAILCfg);
+		SysUtil::SysFree(pSMAILCfg);
 			return ErrorPop();
 		}
 		/* Process queue file */
@@ -1510,7 +1510,7 @@ static int SMAILTryProcessSpool(SHB_HANDLE hShbSMAIL)
 
 		SvrReleaseConfigHandle(hSvrConfig);
 	}
-	SysFree(pSMAILCfg);
+SysUtil::SysFree(pSMAILCfg);
 
 	return 0;
 }

@@ -83,7 +83,7 @@ static int QueGetFilePath(MessageQueue *pMQ, QueueMessage *pQM, char *pszFilePat
 static QueueMessage *QueAllocMessage(int iLevel1, int iLevel2, char const *pszQueueDir,
 				     char const *pszFileName, int iNumTries, time_t tLastTry)
 {
-	QueueMessage *pQM = (QueueMessage *) SysAlloc(sizeof(QueueMessage));
+	QueueMessage *pQM = (QueueMessage *)SysUtil::SysAlloc(sizeof(QueueMessage));
 
 	if (pQM == NULL)
 		return NULL;
@@ -102,8 +102,8 @@ static QueueMessage *QueAllocMessage(int iLevel1, int iLevel2, char const *pszQu
 
 static int QueFreeMessage(QueueMessage *pQM)
 {
-	SysFree(pQM->pszFileName);
-	SysFree(pQM);
+SysUtil::SysFree(pQM->pszFileName);
+SysUtil::SysFree(pQM);
 
 	return 0;
 }
@@ -389,7 +389,7 @@ static unsigned int QueRsndThread(void *pThreadData)
 QUEUE_HANDLE QueOpen(char const *pszRootPath, int iMaxRetry, int iRetryTimeout,
 		     int iRetryIncrRatio, int iNumDirsLevel)
 {
-	MessageQueue *pMQ = (MessageQueue *) SysAlloc(sizeof(MessageQueue));
+	MessageQueue *pMQ = (MessageQueue *)SysUtil::SysAlloc(sizeof(MessageQueue));
 
 	if (pMQ == NULL)
 		return INVALID_QUEUE_HANDLE;
@@ -405,12 +405,12 @@ QUEUE_HANDLE QueOpen(char const *pszRootPath, int iMaxRetry, int iRetryTimeout,
 	pMQ->ulFlags = 0;
 
 	if ((pMQ->hMutex = SysCreateMutex()) == SYS_INVALID_MUTEX) {
-		SysFree(pMQ);
+	SysUtil::SysFree(pMQ);
 		return INVALID_QUEUE_HANDLE;
 	}
 	if ((pMQ->hReadyEvent = SysCreateEvent(1)) == SYS_INVALID_EVENT) {
 		SysCloseMutex(pMQ->hMutex);
-		SysFree(pMQ);
+	SysUtil::SysFree(pMQ);
 		return INVALID_QUEUE_HANDLE;
 	}
 	/* Set the queue root path */
@@ -424,10 +424,10 @@ QUEUE_HANDLE QueOpen(char const *pszRootPath, int iMaxRetry, int iRetryTimeout,
 	/* Load queue status */
 	if (QueLoad(pMQ) < 0) {
 		ErrorPush();
-		SysFree(pMQ->pszRootPath);
+	SysUtil::SysFree(pMQ->pszRootPath);
 		SysCloseEvent(pMQ->hReadyEvent);
 		SysCloseMutex(pMQ->hMutex);
-		SysFree(pMQ);
+	SysUtil::SysFree(pMQ);
 
 		ErrSetErrorCode(ErrorPop());
 		return INVALID_QUEUE_HANDLE;
@@ -437,10 +437,10 @@ QUEUE_HANDLE QueOpen(char const *pszRootPath, int iMaxRetry, int iRetryTimeout,
 		ErrorPush();
 		QueFreeMessList(&pMQ->ReadyQueue);
 		QueFreeMessList(&pMQ->RsndArenaQueue);
-		SysFree(pMQ->pszRootPath);
+	SysUtil::SysFree(pMQ->pszRootPath);
 		SysCloseEvent(pMQ->hReadyEvent);
 		SysCloseMutex(pMQ->hMutex);
-		SysFree(pMQ);
+	SysUtil::SysFree(pMQ);
 
 		ErrSetErrorCode(ErrorPop());
 		return INVALID_QUEUE_HANDLE;
@@ -463,8 +463,8 @@ int QueClose(QUEUE_HANDLE hQueue)
 	QueFreeMessList(&pMQ->RsndArenaQueue);
 	SysCloseEvent(pMQ->hReadyEvent);
 	SysCloseMutex(pMQ->hMutex);
-	SysFree(pMQ->pszRootPath);
-	SysFree(pMQ);
+SysUtil::SysFree(pMQ->pszRootPath);
+SysUtil::SysFree(pMQ);
 
 	return 0;
 }
@@ -515,7 +515,7 @@ char *QueLoadLastLogEntry(char const *pszLogFilePath)
 
 	/* Load last entry */
 	unsigned int uEntrySize = (unsigned int) (llEndOffset - llBaseOffset);
-	char *pszEntry = (char *) SysAlloc(uEntrySize + 1);
+	char *pszEntry = (char *)SysUtil::SysAlloc(uEntrySize + 1);
 
 	if (pszEntry == NULL) {
 		fclose(pLogFile);
@@ -523,7 +523,7 @@ char *QueLoadLastLogEntry(char const *pszLogFilePath)
 	}
 	Sys_fseek(pLogFile, llBaseOffset, SEEK_SET);
 	if (!fread(pszEntry, uEntrySize, 1, pLogFile)) {
-		SysFree(pszEntry);
+	SysUtil::SysFree(pszEntry);
 		fclose(pLogFile);
 		ErrSetErrorCode(ERR_FILE_READ, pszLogFilePath);
 		return NULL;

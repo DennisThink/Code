@@ -45,7 +45,9 @@
 #include "Base64Enc.h"
 #include "MD5.h"
 #include "MailSvr.h"
-
+//DennisThink
+#include "SysUtil.h"
+//
 #define STD_SMTP_TIMEOUT        STD_SERVER_TIMEOUT
 #define SMTPGW_LINE_MAX         1024
 #define SMTPGW_TABLE_FILE       "smtpgw.tab"
@@ -134,21 +136,21 @@ static char *USmtpGetFwdTableFilePath(char *pszFwdFilePath, int iMaxPath)
 
 static void USmtpCleanupGateway(SMTPGateway *pGw)
 {
-	SysFree(pGw->pszHost);
-	SysFree(pGw->pszIFace);
+SysUtil::SysFree(pGw->pszHost);
+SysUtil::SysFree(pGw->pszIFace);
 }
 
 static void USmtpFreeGateway(SMTPGateway *pGw)
 {
 	USmtpCleanupGateway(pGw);
-	SysFree(pGw);
+SysUtil::SysFree(pGw);
 }
 
 static SMTPGateway *USmtpCloneGateway(SMTPGateway const *pRefGw, char const *pszHost)
 {
 	SMTPGateway *pGw;
 
-	if ((pGw = (SMTPGateway *) SysAlloc(sizeof(SMTPGateway))) == NULL)
+	if ((pGw = (SMTPGateway *)SysUtil::SysAlloc(sizeof(SMTPGateway))) == NULL)
 		return NULL;
 	pGw->ulFlags = pRefGw->ulFlags;
 	pGw->pszHost = SysStrDup(pszHost);
@@ -173,7 +175,7 @@ static int USmtpOptionsAssign(void *pPrivate, char const *pszName, char const *p
 		}
 	} else if (strcmp(pszName, "OutBind") == 0) {
 		if (pszValue != NULL) {
-			SysFree(pGw->pszIFace);
+		SysUtil::SysFree(pGw->pszIFace);
 			pGw->pszIFace = SysStrDup(pszValue);
 		}
 	}
@@ -202,7 +204,7 @@ SMTPGateway **USmtpMakeGateways(char const * const *ppszGwHosts, char const **pp
 		}
 	}
 	if ((ppGws = (SMTPGateway **)
-	     SysAlloc((iNumGws + 1) * sizeof(SMTPGateway *))) == NULL) {
+	    SysUtil::SysAlloc((iNumGws + 1) * sizeof(SMTPGateway *))) == NULL) {
 		USmtpCleanupGateway(&GwOpts);
 		return NULL;
 	}
@@ -211,7 +213,7 @@ SMTPGateway **USmtpMakeGateways(char const * const *ppszGwHosts, char const **pp
 			for (i--; i >= 0; i--)
 				USmtpFreeGateway(ppGws[i]);
 			USmtpCleanupGateway(&GwOpts);
-			SysFree(ppGws);
+		SysUtil::SysFree(ppGws);
 			return NULL;
 		}
 	}
@@ -226,7 +228,7 @@ void USmtpFreeGateways(SMTPGateway **ppGws)
 	if (ppGws != NULL)
 		for (int i = 0; ppGws[i] != NULL; i++)
 			USmtpFreeGateway(ppGws[i]);
-	SysFree(ppGws);
+SysUtil::SysFree(ppGws);
 }
 
 SMTPGateway **USmtpGetCfgGateways(SVRCFG_HANDLE hSvrConfig,  char const * const *ppszGwHosts,
@@ -245,7 +247,7 @@ SMTPGateway **USmtpGetCfgGateways(SVRCFG_HANDLE hSvrConfig,  char const * const 
 
 	ppGws = USmtpMakeGateways(ppszGwHosts, pszGwOptions);
 
-	SysFree(pszCfgOptions);
+SysUtil::SysFree(pszCfgOptions);
 
 	return ppGws;
 }
@@ -383,7 +385,7 @@ static int USmtpWriteGateway(FILE *pGwFile, char const *pszDomain, char const *p
 		return ErrGetErrorCode();
 
 	fprintf(pGwFile, "%s\t", pszQuoted);
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Gateway */
 	pszQuoted = StrQuote(pszGateway, '"');
@@ -392,7 +394,7 @@ static int USmtpWriteGateway(FILE *pGwFile, char const *pszDomain, char const *p
 		return ErrGetErrorCode();
 
 	fprintf(pGwFile, "%s\n", pszQuoted);
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	return 0;
 }
@@ -605,7 +607,7 @@ char **USmtpGetPathStrings(char const *pszMailCmd)
 	if (iPathLength > 0 && USmlValidAddress(pszOpen + 1, pszClose) < 0)
 		return NULL;
 
-	char *pszPath = (char *) SysAlloc(iPathLength + 1);
+	char *pszPath = (char *)SysUtil::SysAlloc(iPathLength + 1);
 
 	if (pszPath == NULL)
 		return NULL;
@@ -613,7 +615,7 @@ char **USmtpGetPathStrings(char const *pszMailCmd)
 
 	char **ppszDomains = StrTokenize(pszPath, ",:");
 
-	SysFree(pszPath);
+SysUtil::SysFree(pszPath);
 
 	return ppszDomains;
 }
@@ -696,8 +698,8 @@ int USmtpSetError(SMTPError *pSMTPE, int iSTMPResponse, char const *pszSTMPRespo
 		  char const *pszServer)
 {
 	pSMTPE->iSTMPResponse = iSTMPResponse;
-	SysFree(pSMTPE->pszSTMPResponse);
-	SysFree(pSMTPE->pszServer);
+SysUtil::SysFree(pSMTPE->pszSTMPResponse);
+SysUtil::SysFree(pSMTPE->pszServer);
 	pSMTPE->pszSTMPResponse = SysStrDup(pszSTMPResponse);
 	pSMTPE->pszServer = SysStrDup(pszServer);
 
@@ -706,7 +708,7 @@ int USmtpSetError(SMTPError *pSMTPE, int iSTMPResponse, char const *pszSTMPRespo
 
 static int USmtpSetErrorServer(SMTPError *pSMTPE, char const *pszServer)
 {
-	SysFree(pSMTPE->pszServer);
+SysUtil::SysFree(pSMTPE->pszServer);
 	pSMTPE->pszServer = SysStrDup(pszServer);
 
 	return 0;
@@ -725,8 +727,8 @@ char const *USmtpGetErrorMessage(SMTPError const *pSMTPE)
 
 int USmtpCleanupError(SMTPError *pSMTPE)
 {
-	SysFree(pSMTPE->pszSTMPResponse);
-	SysFree(pSMTPE->pszServer);
+SysUtil::SysFree(pSMTPE->pszSTMPResponse);
+SysUtil::SysFree(pSMTPE->pszServer);
 	USmtpInitError(pSMTPE);
 
 	return 0;
@@ -1181,8 +1183,8 @@ static int USmtpSwitchToSSL(SmtpChannel *pSmtpCh, SMTPGateway const *pGw, SMTPEr
 	 * We may want to add verify code here ...
 	 */
 
-	SysFree(SslE.pszIssuer);
-	SysFree(SslE.pszSubject);
+SysUtil::SysFree(SslE.pszIssuer);
+SysUtil::SysFree(SslE.pszSubject);
 
 	return iError;
 }
@@ -1196,9 +1198,9 @@ static void USmtpCleanEHLO(SmtpChannel *pSmtpCh)
 static void USmtpFreeChannel(SmtpChannel *pSmtpCh)
 {
 	BSckDetach(pSmtpCh->hBSock, 1);
-	SysFree(pSmtpCh->pszServer);
-	SysFree(pSmtpCh->pszDomain);
-	SysFree(pSmtpCh);
+SysUtil::SysFree(pSmtpCh->pszServer);
+SysUtil::SysFree(pSmtpCh->pszDomain);
+SysUtil::SysFree(pSmtpCh);
 }
 
 SMTPCH_HANDLE USmtpCreateChannel(SMTPGateway const *pGw, char const *pszDomain, SMTPError *pSMTPE)
@@ -1262,7 +1264,7 @@ SMTPCH_HANDLE USmtpCreateChannel(SMTPGateway const *pGw, char const *pszDomain, 
 		return INVALID_SMTPCH_HANDLE;
 	}
 	/* Read welcome message */
-	SmtpChannel *pSmtpCh = (SmtpChannel *) SysAlloc(sizeof(SmtpChannel));
+	SmtpChannel *pSmtpCh = (SmtpChannel *)SysUtil::SysAlloc(sizeof(SmtpChannel));
 
 	if (pSmtpCh == NULL) {
 		BSckDetach(hBSock, 1);
@@ -1530,16 +1532,16 @@ static SMTPGateway *USmtpGetDefaultGateway(SVRCFG_HANDLE hSvrConfig, char const 
 	SMTPGateway *pGw;
 	char *pszCfgOptions;
 
-	if ((pGw = (SMTPGateway *) SysAlloc(sizeof(SMTPGateway))) == NULL)
+	if ((pGw = (SMTPGateway *)SysUtil::SysAlloc(sizeof(SMTPGateway))) == NULL)
 		return NULL;
 	pGw->pszHost = SysStrDup(pszServer);
 	if ((pszCfgOptions = SvrGetConfigVar(hSvrConfig, "SmtpGwConfig")) != NULL &&
 	    USmtpSetGwOptions(pGw, pszCfgOptions) < 0) {
-		SysFree(pszCfgOptions);
+	SysUtil::SysFree(pszCfgOptions);
 		USmtpFreeGateway(pGw);
 		return NULL;
 	}
-	SysFree(pszCfgOptions);
+SysUtil::SysFree(pszCfgOptions);
 
 	return pGw;
 }
@@ -1584,7 +1586,7 @@ char *USmtpBuildRcptPath(char const *const *ppszRcptTo, SVRCFG_HANDLE hSvrConfig
 	if (pszSendRcpt == NULL)
 		return NULL;
 
-	char *pszRcptPath = (char *) SysAlloc(strlen(pszSendRcpt) + strlen(szSpecMXHost) + 2);
+	char *pszRcptPath = (char *)SysUtil::SysAlloc(strlen(pszSendRcpt) + strlen(szSpecMXHost) + 2);
 
 	if (pszRcptPath != NULL) {
 		if (iRcptCount == 1)
@@ -1592,7 +1594,7 @@ char *USmtpBuildRcptPath(char const *const *ppszRcptTo, SVRCFG_HANDLE hSvrConfig
 		else
 			sprintf(pszRcptPath, "%s,%s", szSpecMXHost, pszSendRcpt);
 	}
-	SysFree(pszSendRcpt);
+SysUtil::SysFree(pszSendRcpt);
 
 	return pszRcptPath;
 }
@@ -1609,7 +1611,7 @@ SMTPGateway **USmtpGetMailExchangers(SVRCFG_HANDLE hSvrConfig, char const *pszDo
 
 	char **ppszMXGWs = StrTokenize(pszDefaultGws, ";");
 
-	SysFree(pszDefaultGws);
+SysUtil::SysFree(pszDefaultGws);
 	if (ppszMXGWs == NULL)
 		return NULL;
 
@@ -1617,7 +1619,7 @@ SMTPGateway **USmtpGetMailExchangers(SVRCFG_HANDLE hSvrConfig, char const *pszDo
 	SMTPGateway **ppGws;
 
 	if ((ppGws = (SMTPGateway **)
-	     SysAlloc((iNumGws + 1) * sizeof(SMTPGateway *))) == NULL) {
+	    SysUtil::SysAlloc((iNumGws + 1) * sizeof(SMTPGateway *))) == NULL) {
 		StrFreeStrings(ppszMXGWs);
 		return NULL;
 	}
@@ -1629,11 +1631,11 @@ SMTPGateway **USmtpGetMailExchangers(SVRCFG_HANDLE hSvrConfig, char const *pszDo
 
 		if ((pszOptions = strchr(pszHost, ',')) != NULL)
 			*pszOptions++ = '\0';
-		if ((ppGws[i] = (SMTPGateway *) SysAlloc(sizeof(SMTPGateway))) == NULL) {
+		if ((ppGws[i] = (SMTPGateway *)SysUtil::SysAlloc(sizeof(SMTPGateway))) == NULL) {
 			for (i--; i >= 0; i--)
 				USmtpFreeGateway(ppGws[i]);
-			SysFree(ppGws);
-			SysFree(pszCfgOptions);
+		SysUtil::SysFree(ppGws);
+		SysUtil::SysFree(pszCfgOptions);
 			StrFreeStrings(ppszMXGWs);
 			return NULL;
 		}
@@ -1644,14 +1646,14 @@ SMTPGateway **USmtpGetMailExchangers(SVRCFG_HANDLE hSvrConfig, char const *pszDo
 		     USmtpSetGwOptions(ppGws[i], pszCfgOptions) < 0)) {
 			for (; i >= 0; i--)
 				USmtpFreeGateway(ppGws[i]);
-			SysFree(ppGws);
-			SysFree(pszCfgOptions);
+		SysUtil::SysFree(ppGws);
+		SysUtil::SysFree(pszCfgOptions);
 			StrFreeStrings(ppszMXGWs);
 			return NULL;
 		}
 	}
 	ppGws[i] = NULL;
-	SysFree(pszCfgOptions);
+SysUtil::SysFree(pszCfgOptions);
 	StrFreeStrings(ppszMXGWs);
 
 	return ppGws;
@@ -1664,7 +1666,7 @@ static int USmtpGetDomainMX(SVRCFG_HANDLE hSvrConfig, char const *pszDomain, cha
 
 	iResult = CDNS_GetDomainMX(pszDomain, pszMXDomains, pszSmartDNS);
 
-	SysFree(pszSmartDNS);
+SysUtil::SysFree(pszSmartDNS);
 
 	return iResult;
 }
@@ -1680,7 +1682,7 @@ int USmtpCheckMailDomain(SVRCFG_HANDLE hSvrConfig, char const *pszDomain)
 			return ERR_INVALID_MAIL_DOMAIN;
 		}
 	} else
-		SysFree(pszMXDomains);
+	SysUtil::SysFree(pszMXDomains);
 
 	return 0;
 }
@@ -1694,10 +1696,10 @@ MXS_HANDLE USmtpGetMXFirst(SVRCFG_HANDLE hSvrConfig, char const *pszDomain, char
 		return INVALID_MXS_HANDLE;
 
 	/* MX records structure allocation */
-	SmtpMXRecords *pMXR = (SmtpMXRecords *) SysAlloc(sizeof(SmtpMXRecords));
+	SmtpMXRecords *pMXR = (SmtpMXRecords *)SysUtil::SysAlloc(sizeof(SmtpMXRecords));
 
 	if (pMXR == NULL) {
-		SysFree(pszMXHosts);
+	SysUtil::SysFree(pszMXHosts);
 		return INVALID_MXS_HANDLE;
 	}
 
@@ -1719,10 +1721,10 @@ MXS_HANDLE USmtpGetMXFirst(SVRCFG_HANDLE hSvrConfig, char const *pszDomain, char
 		if ((pszToken = SysStrTok(NULL, ":, \t\r\n", &pszSavePtr)) == NULL) {
 			for (--pMXR->iNumMXRecords; pMXR->iNumMXRecords >= 0;
 			     pMXR->iNumMXRecords--)
-				SysFree(pMXR->pszMXName[pMXR->iNumMXRecords]);
-			SysFree(pMXR);
+			SysUtil::SysFree(pMXR->pszMXName[pMXR->iNumMXRecords]);
+		SysUtil::SysFree(pMXR);
 
-			SysFree(pszMXHosts);
+		SysUtil::SysFree(pszMXHosts);
 
 			ErrSetErrorCode(ERR_INVALID_MXRECS_STRING);
 			return INVALID_MXS_HANDLE;
@@ -1741,12 +1743,12 @@ MXS_HANDLE USmtpGetMXFirst(SVRCFG_HANDLE hSvrConfig, char const *pszDomain, char
 		++pMXR->iNumMXRecords;
 		pszToken = SysStrTok(NULL, ":, \t\r\n", &pszSavePtr);
 	}
-	SysFree(pszMXHosts);
+SysUtil::SysFree(pszMXHosts);
 
 	if (iMXCost == INT_MAX) {
 		for (--pMXR->iNumMXRecords; pMXR->iNumMXRecords >= 0; pMXR->iNumMXRecords--)
-			SysFree(pMXR->pszMXName[pMXR->iNumMXRecords]);
-		SysFree(pMXR);
+		SysUtil::SysFree(pMXR->pszMXName[pMXR->iNumMXRecords]);
+	SysUtil::SysFree(pMXR);
 
 		ErrSetErrorCode(ERR_INVALID_MXRECS_STRING);
 		return INVALID_MXS_HANDLE;
@@ -1788,8 +1790,8 @@ void USmtpMXSClose(MXS_HANDLE hMXSHandle)
 	SmtpMXRecords *pMXR = (SmtpMXRecords *) hMXSHandle;
 
 	for (--pMXR->iNumMXRecords; pMXR->iNumMXRecords >= 0; pMXR->iNumMXRecords--)
-		SysFree(pMXR->pszMXName[pMXR->iNumMXRecords]);
-	SysFree(pMXR);
+	SysUtil::SysFree(pMXR->pszMXName[pMXR->iNumMXRecords]);
+SysUtil::SysFree(pMXR);
 }
 
 int USmtpDnsMapsContained(SYS_INET_ADDR const &PeerInfo, char const *pszMapsServer)

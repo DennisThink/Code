@@ -33,7 +33,9 @@
 #include "MiscUtils.h"
 #include "SvrUtils.h"
 #include "DNS.h"
-
+//new
+#include "SysUtil.h"
+//
 #define DNS_PORTNO              53
 #define DNS_SOCKET_TIMEOUT      16000
 #define DNS_QUERY_EXTRA         1024
@@ -85,7 +87,7 @@ void DNS_FreeRecList(SysListHead *pHead)
 		DNSRecord *pRec = SYS_LIST_ENTRY(pLnk, DNSRecord, Lnk);
 
 		SYS_LIST_DEL(pLnk);
-		SysFree(pRec);
+		SysUtil::SysFree(pRec);
 	}
 }
 
@@ -100,7 +102,7 @@ void DNS_FreeAnswer(DNSAnswer *pAns)
 static DNSRecord *DNS_AllocRec(DNSAnswer *pAns, int iType,
 			       DNSResourceRecord const *pRR)
 {
-	DNSRecord *pRec = (struct DNSRecord *) SysAlloc(sizeof(DNSRecord));
+	DNSRecord *pRec = (struct DNSRecord *) SysUtil::SysAlloc(sizeof(DNSRecord));
 
 	if (pRec == NULL)
 		return NULL;
@@ -114,7 +116,7 @@ static DNSRecord *DNS_AllocRec(DNSAnswer *pAns, int iType,
 
 static SYS_UINT8 *DNS_AllocRespData(int iSize)
 {
-	SYS_UINT8 *pBaseData = (SYS_UINT8 *) SysAlloc(iSize + DNS_RESPDATA_EXTRA);
+	SYS_UINT8 *pBaseData = (SYS_UINT8 *) SysUtil::SysAlloc(iSize + DNS_RESPDATA_EXTRA);
 
 	if (pBaseData == NULL)
 		return NULL;
@@ -126,7 +128,7 @@ static SYS_UINT8 *DNS_AllocRespData(int iSize)
 static void DNS_FreeRespData(SYS_UINT8 *pRespData)
 {
 	if (pRespData != NULL)
-		SysFree(pRespData - DNS_RESPDATA_EXTRA);
+		SysUtil::SysFree(pRespData - DNS_RESPDATA_EXTRA);
 }
 
 static int DNS_RespDataSize(SYS_UINT8 const *pRespData)
@@ -264,7 +266,7 @@ static int DNS_NameCopy(SYS_UINT8 *pDNSQName, char const *pszInetName)
 		pszToken = SysStrTok(NULL, ".", &pszSavePtr);
 	}
 	*pDNSQName = 0;
-	SysFree(pszNameCopy);
+	SysUtil::SysFree(pszNameCopy);
 
 	return iNameLen + 1;
 }
@@ -284,7 +286,7 @@ static int DNS_RequestSetup(DNSQuery **ppDNSQ, unsigned int uOpCode,
 	DNSQuery *pDNSQ;
 	SYS_UINT8 *pQueryData;
 
-	if ((pDNSQ = (DNSQuery *) SysAlloc(sizeof(DNSQuery))) == NULL)
+	if ((pDNSQ = (DNSQuery *) SysUtil::SysAlloc(sizeof(DNSQuery))) == NULL)
 		return ErrGetErrorCode();
 
 	/* Setup query header */
@@ -464,7 +466,7 @@ static SYS_UINT8 *DNS_QueryExec(char const *pszDNSServer, int iPortNo, int iTime
 	if (pRespData == NULL && iTrunc)
 		pRespData = DNS_QuerySendStream(pszDNSServer, iPortNo, iTimeout,
 						pDNSQ, iQLenght);
-	SysFree(pDNSQ);
+	SysUtil::SysFree(pDNSQ);
 
 	return pRespData;
 }
@@ -755,7 +757,7 @@ static int DNS_LoadRoots(SysListHead *pHead)
 	SYS_INIT_LIST_HEAD(&TmpList);
 	for (iCount = 0; MscFGets(szHost, sizeof(szHost) - 1, pFile) != NULL; iCount++) {
 		if ((pRec = (struct DNSRecord *)
-		     SysAlloc(sizeof(DNSRecord))) == NULL) {
+		     SysUtil::SysAlloc(sizeof(DNSRecord))) == NULL) {
 			DNS_FreeRecList(&TmpList);
 			fclose(pFile);
 			return ErrGetErrorCode();
@@ -836,7 +838,7 @@ int DNS_QueryDirect(char const *pszDNSServer, char const *pszName,
 							DNS_SOCKET_TIMEOUT, pDNSQ,
 							iQLenght);
 	}
-	SysFree(pDNSQ);
+	SysUtil::SysFree(pDNSQ);
 	if (pRespData == NULL)
 		return ErrGetErrorCode();
 	DNS_InitAnswer(pAns);

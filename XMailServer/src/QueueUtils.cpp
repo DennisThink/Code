@@ -75,7 +75,7 @@ static int QueUtDumpFrozen(QUEUE_HANDLE hQueue, QMSG_HANDLE hMessage, FILE *pLis
 
 	if (pszRcpt == NULL) {
 		ErrorPush();
-		SysFree(pszFrom);
+	SysUtil::SysFree(pszFrom);
 		USmlCleanupSpoolFileHeader(SFH);
 		return ErrorPop();
 	}
@@ -98,8 +98,8 @@ static int QueUtDumpFrozen(QUEUE_HANDLE hQueue, QMSG_HANDLE hMessage, FILE *pLis
 		pszFrom, pszRcpt, szTime, FI.llSize, QueGetTryCount(hMessage),
 		QueGetQueueDir(hMessage));
 
-	SysFree(pszRcpt);
-	SysFree(pszFrom);
+SysUtil::SysFree(pszRcpt);
+SysUtil::SysFree(pszFrom);
 	USmlCleanupSpoolFileHeader(SFH);
 
 	return 0;
@@ -261,10 +261,10 @@ int QueUtErrLogMessage(QUEUE_HANDLE hQueue, QMSG_HANDLE hMessage, char const *ps
 		return ErrGetErrorCode();
 
 	if (ErrFileLogString(szSlogFilePath, pszMessage) < 0) {
-		SysFree(pszMessage);
+	SysUtil::SysFree(pszMessage);
 		return ErrGetErrorCode();
 	}
-	SysFree(pszMessage);
+SysUtil::SysFree(pszMessage);
 
 	return 0;
 }
@@ -301,7 +301,7 @@ static char *QueUtGetLogEntryVar(char const *pszLog, char const *pszVarName)
 	if ((iVarLength = (int) (pszEnd - pszEPos)) <= 0)
 		return NULL;
 
-	char *pszVarValue = (char *) SysAlloc(iVarLength + 1);
+	char *pszVarValue = (char *)SysUtil::SysAlloc(iVarLength + 1);
 
 	if (pszVarValue != NULL) {
 		memcpy(pszVarValue, pszEPos, iVarLength);
@@ -323,15 +323,15 @@ int QueUtGetLastLogInfo(char const *pszLogFilePath, QueLogInfo *pQLI)
 	pQLI->pszReason = QueUtGetLogEntryVar(pszEntry, SMTP_ERROR_VARNAME);
 	pQLI->pszServer = QueUtGetLogEntryVar(pszEntry, SMTP_SERVER_VARNAME);
 
-	SysFree(pszEntry);
+SysUtil::SysFree(pszEntry);
 
 	return 0;
 }
 
 void QueUtFreeLastLogInfo(QueLogInfo *pQLI)
 {
-	SysFree(pQLI->pszServer);
-	SysFree(pQLI->pszReason);
+SysUtil::SysFree(pQLI->pszServer);
+SysUtil::SysFree(pQLI->pszReason);
 }
 
 bool QueUtRemoveSpoolErrors(void)
@@ -576,7 +576,7 @@ static int QueUtTXErrorNotifySender(SPLF_HANDLE hFSpool, char const *pszAdminAdd
 
 	if (hSvrConfig == INVALID_SVRCFG_HANDLE) {
 		ErrorPush();
-		SysFree(pszReplyTo);
+	SysUtil::SysFree(pszReplyTo);
 		return ErrorPop();
 	}
 
@@ -587,7 +587,7 @@ static int QueUtTXErrorNotifySender(SPLF_HANDLE hFSpool, char const *pszAdminAdd
 	    SvrConfigVar("RootDomain", szMailDomain, sizeof(szMailDomain) - 1, hSvrConfig) < 0)
 	{
 		SvrReleaseConfigHandle(hSvrConfig);
-		SysFree(pszReplyTo);
+	SysUtil::SysFree(pszReplyTo);
 
 		ErrSetErrorCode(ERR_INCOMPLETE_CONFIG);
 		return ERR_INCOMPLETE_CONFIG;
@@ -601,7 +601,7 @@ static int QueUtTXErrorNotifySender(SPLF_HANDLE hFSpool, char const *pszAdminAdd
 	if (hMessage == INVALID_QMSG_HANDLE) {
 		ErrorPush();
 		SvrReleaseConfigHandle(hSvrConfig);
-		SysFree(pszReplyTo);
+	SysUtil::SysFree(pszReplyTo);
 		return ErrorPop();
 	}
 
@@ -618,11 +618,11 @@ static int QueUtTXErrorNotifySender(SPLF_HANDLE hFSpool, char const *pszAdminAdd
 		QueCleanupMessage(hSpoolQueue, hMessage);
 		QueCloseMessage(hSpoolQueue, hMessage);
 		SvrReleaseConfigHandle(hSvrConfig);
-		SysFree(pszReplyTo);
+	SysUtil::SysFree(pszReplyTo);
 		return ErrorPop();
 	}
 
-	SysFree(pszReplyTo);
+SysUtil::SysFree(pszReplyTo);
 
 	/* Send error response mail file */
 	if (QueCommitMessage(hSpoolQueue, hMessage) < 0) {

@@ -42,6 +42,9 @@
 #include "SMAILUtils.h"
 #include "MailDomains.h"
 
+//DennisThink
+#include "SysUtil.h"
+//
 #define MAIL_DOMAINS_DIR            "domains"
 #define MAIL_DOMAINS_FILE           "domains.tab"
 #define MAIL_DOMAINS_LINE_MAX       512
@@ -360,7 +363,7 @@ int MDomGetDomainsFileSnapShot(const char *pszFileName)
 
 DOMLS_HANDLE MDomOpenDB(void)
 {
-	DomainsScanData *pDSD = (DomainsScanData *) SysAlloc(sizeof(DomainsScanData));
+	DomainsScanData *pDSD = (DomainsScanData *) SysUtil::SysAlloc(sizeof(DomainsScanData));
 
 	if (pDSD == NULL)
 		return INVALID_DOMLS_HANDLE;
@@ -369,13 +372,13 @@ DOMLS_HANDLE MDomOpenDB(void)
 
 	if (MDomGetDomainsFileSnapShot(pDSD->szTmpDBFile) < 0) {
 		CheckRemoveFile(pDSD->szTmpDBFile);
-		SysFree(pDSD);
+	SysUtil::SysFree(pDSD);
 		return INVALID_DOMLS_HANDLE;
 	}
 
 	if ((pDSD->pDBFile = fopen(pDSD->szTmpDBFile, "rt")) == NULL) {
 		SysRemove(pDSD->szTmpDBFile);
-		SysFree(pDSD);
+	    SysUtil::SysFree(pDSD);
 		return INVALID_DOMLS_HANDLE;
 	}
 
@@ -388,7 +391,7 @@ void MDomCloseDB(DOMLS_HANDLE hDomainsDB)
 
 	fclose(pDSD->pDBFile);
 	SysRemove(pDSD->szTmpDBFile);
-	SysFree(pDSD);
+SysUtil::SysFree(pDSD);
 }
 
 char const *MDomGetFirstDomain(DOMLS_HANDLE hDomainsDB)

@@ -79,7 +79,7 @@ static CTRLConfig *CTRLGetConfigCopy(SHB_HANDLE hShbCTRL)
 	if (pCTRLCfg == NULL)
 		return NULL;
 
-	CTRLConfig *pCTRLCfgCopy = (CTRLConfig *) SysAlloc(sizeof(CTRLConfig));
+	CTRLConfig *pCTRLCfgCopy = (CTRLConfig *)SysUtil::SysAlloc(sizeof(CTRLConfig));
 
 	if (pCTRLCfgCopy != NULL)
 		memcpy(pCTRLCfgCopy, pCTRLCfg, sizeof(CTRLConfig));
@@ -218,7 +218,7 @@ static int CTRLVSendCmdResult(CTRLConfig *pCTRLCfg, BSOCK_HANDLE hBSock, int iEr
 
 	int iSendResult = CTRLSendCmdResult(hBSock, iErrorCode, pszMessage, pCTRLCfg->iTimeout);
 
-	SysFree(pszMessage);
+SysUtil::SysFree(pszMessage);
 
 	return iSendResult;
 }
@@ -350,8 +350,8 @@ static int CTRLLogin(CTRLConfig *pCTRLCfg, BSOCK_HANDLE hBSock,
 		if (iError < 0)
 			return iError;
 
-		SysFree(SslE.pszIssuer);
-		SysFree(SslE.pszSubject);
+	SysUtil::SysFree(SslE.pszIssuer);
+	SysUtil::SysFree(SslE.pszSubject);
 		if (BSckGetString(hBSock, szLogin, sizeof(szLogin) - 1,
 				  pCTRLCfg->iTimeout) == NULL ||
 		    MscCmdStringCheck(szLogin) < 0)
@@ -495,7 +495,7 @@ static int CTRLDo_userpasswd(CTRLConfig *pCTRLCfg, BSOCK_HANDLE hBSock,
 		return ErrorPop();
 	}
 	/* Set account password and do modify */
-	SysFree(pUI->pszPassword);
+SysUtil::SysFree(pUI->pszPassword);
 	pUI->pszPassword = SysStrDup(ppszTokens[3]);
 
 	if (UsrModifyUser(pUI) < 0) {
@@ -869,12 +869,12 @@ static int CTRLDo_uservars(CTRLConfig *pCTRLCfg, BSOCK_HANDLE hBSock,
 			if (BSckVSendString(hBSock, pCTRLCfg->iTimeout, "\"%s\"\t\"%s\"",
 					    ppszVars[ii], pszVar) < 0) {
 				ErrorPush();
-				SysFree(pszVar);
+			SysUtil::SysFree(pszVar);
 				StrFreeStrings(ppszVars);
 				UsrFreeUserInfo(pUI);
 				return ErrorPop();
 			}
-			SysFree(pszVar);
+		SysUtil::SysFree(pszVar);
 		}
 	}
 	StrFreeStrings(ppszVars);
@@ -2476,7 +2476,7 @@ static int CTRLHandleSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock,
 	/* User login */
 	if (CTRLLogin(pCTRLCfg, hBSock, szTimeStamp, PeerInfo) < 0) {
 		ErrorPush();
-		SysFree(pCTRLCfg);
+	SysUtil::SysFree(pCTRLCfg);
 		return ErrorPop();
 	}
 
@@ -2494,7 +2494,7 @@ static int CTRLHandleSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock,
 		if (CTRLProcessCommand(pCTRLCfg, hBSock, szCommand) == CTRL_QUIT_CMD_EXIT)
 			break;
 	}
-	SysFree(pCTRLCfg);
+SysUtil::SysFree(pCTRLCfg);
 
 	return 0;
 }
@@ -2509,7 +2509,7 @@ unsigned int CTRLClientThread(void *pThreadData)
 	if (hBSock == INVALID_BSOCK_HANDLE) {
 		ErrorPush();
 		SysCloseSocket(pThCtx->SockFD);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -2524,7 +2524,7 @@ unsigned int CTRLClientThread(void *pThreadData)
 		if (CSslBindSetup(&SSLB) < 0) {
 			ErrorPush();
 			SysCloseSocket(pThCtx->SockFD);
-			SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 			return ErrorPop();
 		}
 		ZeroData(SslE);
@@ -2535,15 +2535,15 @@ unsigned int CTRLClientThread(void *pThreadData)
 		if (iError < 0) {
 			ErrorPush();
 			SysCloseSocket(pThCtx->SockFD);
-			SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 			return ErrorPop();
 		}
 		/*
 		 * We may want to add verify code here ...
 		 */
 
-		SysFree(SslE.pszIssuer);
-		SysFree(SslE.pszSubject);
+	SysUtil::SysFree(SslE.pszIssuer);
+	SysUtil::SysFree(SslE.pszSubject);
 	}
 	/* Check IP permission */
 	if (CTRLCheckPeerIP(pThCtx->SockFD) < 0) {
@@ -2552,7 +2552,7 @@ unsigned int CTRLClientThread(void *pThreadData)
 			      ErrGetErrorString(ErrorFetch()));
 		CTRLSendCmdResult(hBSock, ErrorFetch(), ErrGetErrorString(), STD_CTRL_TIMEOUT);
 		BSckDetach(hBSock, 1);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 	/* Increase threads count */
@@ -2562,7 +2562,7 @@ unsigned int CTRLClientThread(void *pThreadData)
 			      ErrGetErrorString(ErrorFetch()));
 		CTRLSendCmdResult(hBSock, ErrorFetch(), ErrGetErrorString(), STD_CTRL_TIMEOUT);
 		BSckDetach(hBSock, 1);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 	/* Get client socket information */
@@ -2573,7 +2573,7 @@ unsigned int CTRLClientThread(void *pThreadData)
 		SysLogMessage(LOG_LEV_ERROR, "%s\n", ErrGetErrorString());
 		CTRLThreadCountAdd(-1, pThCtx->pThCfg->hThShb);
 		BSckDetach(hBSock, 1);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -2593,7 +2593,7 @@ unsigned int CTRLClientThread(void *pThreadData)
 
 	/* Unlink socket from the bufferer and close it */
 	BSckDetach(hBSock, 1);
-	SysFree(pThCtx);
+SysUtil::SysFree(pThCtx);
 
 	return 0;
 }

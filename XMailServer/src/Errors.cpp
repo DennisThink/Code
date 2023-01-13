@@ -321,8 +321,8 @@ static void ErrFreeEnv(void *pData)
 
 		for (int i = 0; i < (int) CountOf(Errors); i++, ppszInfo++)
 			if (*ppszInfo != NULL)
-				SysFree(*ppszInfo), *ppszInfo = NULL;
-		SysFree(pEV);
+			SysUtil::SysFree(*ppszInfo), *ppszInfo = NULL;
+	SysUtil::SysFree(pEV);
 	}
 }
 
@@ -345,7 +345,7 @@ static ErrorEnv *ErrSetupEnv(void)
 	ErrorEnv *pEV = (ErrorEnv *) SysGetTlsKeyData(ErrTlsKey);
 
 	if (pEV == NULL) {
-		if ((pEV = (ErrorEnv *) SysAlloc(sizeof(ErrorEnv) +
+		if ((pEV = (ErrorEnv *)SysUtil::SysAlloc(sizeof(ErrorEnv) +
 						 ERROR_COUNT * sizeof(char *))) == NULL)
 			return NULL;
 
@@ -357,7 +357,7 @@ static ErrorEnv *ErrSetupEnv(void)
 			*ppszInfo = NULL;
 
 		if (SysSetTlsKeyData(ErrTlsKey, pEV) < 0) {
-			SysFree(pEV);
+		SysUtil::SysFree(pEV);
 			return NULL;
 		}
 	}
@@ -387,7 +387,7 @@ int ErrSetErrorCode(int iError, char const *pszInfo, int iSize)
 		iError = -iError;
 		if (iError >= 0 && iError < ERROR_COUNT) {
 			if (pEV->pszInfo[iError] != NULL)
-				SysFree(pEV->pszInfo[iError]);
+			SysUtil::SysFree(pEV->pszInfo[iError]);
 			pEV->pszInfo[iError] = (char *) StrMemDup(pszInfo, iSize, 0);
 		}
 	}
@@ -427,7 +427,7 @@ char *ErrGetErrorStringInfo(int iError)
 
 	int iInfoLength = (pEV->pszInfo[iErrIndex] != NULL) ? strlen(pEV->pszInfo[iErrIndex]): 0;
 	char const *pszError = pszErrors[iErrIndex] != NULL ? pszErrors[iErrIndex]: "Unknown error code";
-	char *pszErrorInfo = (char *) SysAlloc(strlen(pszError) + iInfoLength + 256);
+	char *pszErrorInfo = (char *)SysUtil::SysAlloc(strlen(pszError) + iInfoLength + 256);
 
 	if (pszErrorInfo == NULL)
 		return NULL;
@@ -455,14 +455,14 @@ int ErrLogMessage(int iLogLevel, char const *pszFormat, ...)
 
 	StrVSprint(pszUserMessage, pszFormat, pszFormat);
 	if (pszUserMessage == NULL) {
-		SysFree(pszErrorInfo);
+	SysUtil::SysFree(pszErrorInfo);
 		return ErrGetErrorCode();
 	}
 
 	SysLogMessage(iLogLevel, "<<\n" "%s\n" "%s" ">>\n", pszErrorInfo, pszUserMessage);
 
-	SysFree(pszUserMessage);
-	SysFree(pszErrorInfo);
+SysUtil::SysFree(pszUserMessage);
+SysUtil::SysFree(pszErrorInfo);
 
 	return 0;
 }
@@ -477,7 +477,7 @@ int ErrFileLogString(char const *pszFileName, char const *pszMessage)
 	FILE *pLogFile = fopen(pszFileName, "a+t");
 
 	if (pLogFile == NULL) {
-		SysFree(pszErrorInfo);
+	SysUtil::SysFree(pszErrorInfo);
 
 		ErrSetErrorCode(ERR_FILE_CREATE, pszFileName);
 		return ERR_FILE_CREATE;
@@ -486,7 +486,7 @@ int ErrFileLogString(char const *pszFileName, char const *pszMessage)
 	fprintf(pLogFile, "<<\n" "%s\n" "%s" ">>\n", pszErrorInfo, pszMessage);
 
 	fclose(pLogFile);
-	SysFree(pszErrorInfo);
+SysUtil::SysFree(pszErrorInfo);
 
 	return 0;
 }

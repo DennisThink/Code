@@ -44,11 +44,11 @@ ARRAY_HANDLE ArrayCreate(unsigned long ulSize)
 {
 	Array *pAr;
 
-	if ((pAr = (Array *) SysAlloc(sizeof(Array))) == NULL)
+	if ((pAr = (Array *)SysUtil::SysAlloc(sizeof(Array))) == NULL)
 		return INVALID_ARRAY_HANDLE;
 	pAr->ulAlloc = ulSize + 1;
-	if ((pAr->ppData = (void **) SysAlloc(pAr->ulAlloc * sizeof(void *))) == NULL) {
-		SysFree(pAr);
+	if ((pAr->ppData = (void **)SysUtil::SysAlloc(pAr->ulAlloc * sizeof(void *))) == NULL) {
+	SysUtil::SysFree(pAr);
 		return INVALID_ARRAY_HANDLE;
 	}
 
@@ -65,8 +65,8 @@ void ArrayFree(ARRAY_HANDLE hArray, void (*pFree)(void *, void *),
 			for (unsigned long i = 0; i < pAr->ulCount; i++)
 				if (pAr->ppData[i] != NULL)
 					(*pFree)(pPrivate, pAr->ppData[i]);
-		SysFree(pAr->ppData);
-		SysFree(pAr);
+	SysUtil::SysFree(pAr->ppData);
+	SysUtil::SysFree(pAr);
 	}
 }
 
@@ -76,7 +76,7 @@ int ArraySet(ARRAY_HANDLE hArray, unsigned long ulIdx, void *pData)
 
 	if (ulIdx >= pAr->ulAlloc) {
 		unsigned long i, ulAlloc = (3 * ulIdx) / 2 + ARRAY_EXTRA_SPACE;
-		void **ppData = (void **) SysRealloc(pAr->ppData,
+		void **ppData = (void **)SysUtil::SysRealloc(pAr->ppData,
 						     ulAlloc * sizeof(void *));
 
 		if (ppData == NULL)

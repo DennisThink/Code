@@ -86,9 +86,9 @@ int CSslBindSetup(SslServerBind *pSSLB)
 void CSslBindCleanup(SslServerBind *pSSLB)
 {
 
-	SysFree(pSSLB->pszKeyFile);
-	SysFree(pSSLB->pszCertFile);
-	SysFree(pSSLB->pszCAFile);
-	SysFree(pSSLB->pszCAPath);
+SysUtil::SysFree(pSSLB->pszKeyFile);
+SysUtil::SysFree(pSSLB->pszCertFile);
+SysUtil::SysFree(pSSLB->pszCAFile);
+SysUtil::SysFree(pSSLB->pszCAPath);
 }
 

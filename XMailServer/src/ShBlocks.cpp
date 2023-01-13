@@ -33,19 +33,19 @@ struct SharedBlock {
 
 SHB_HANDLE ShbCreateBlock(unsigned int uSize)
 {
-	SharedBlock *pSHB = (SharedBlock *) SysAlloc(sizeof(SharedBlock));
+	SharedBlock *pSHB = (SharedBlock *)SysUtil::SysAlloc(sizeof(SharedBlock));
 
 	if (pSHB == NULL)
 		return SHB_INVALID_HANDLE;
 
 	pSHB->uSize = uSize;
 	if ((pSHB->hMutex = SysCreateMutex()) == SYS_INVALID_MUTEX) {
-		SysFree(pSHB);
+	SysUtil::SysFree(pSHB);
 		return SHB_INVALID_HANDLE;
 	}
-	if ((pSHB->pData = SysAlloc(uSize)) == NULL) {
+	if ((pSHB->pData =SysUtil::SysAlloc(uSize)) == NULL) {
 		SysCloseMutex(pSHB->hMutex);
-		SysFree(pSHB);
+	SysUtil::SysFree(pSHB);
 		return SHB_INVALID_HANDLE;
 	}
 
@@ -57,8 +57,8 @@ int ShbCloseBlock(SHB_HANDLE hBlock)
 	SharedBlock *pSHB = (SharedBlock *) hBlock;
 
 	SysCloseMutex(pSHB->hMutex);
-	SysFree(pSHB->pData);
-	SysFree(pSHB);
+SysUtil::SysFree(pSHB->pData);
+SysUtil::SysFree(pSHB);
 
 	return 0;
 }

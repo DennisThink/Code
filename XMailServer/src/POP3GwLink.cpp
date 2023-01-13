@@ -106,7 +106,7 @@ static POP3Link *GwLkGetLinkFromStrings(char **ppszStrings)
 	if (StrDeCrypt(ppszStrings[lnkRmtPassword], szPassword) == NULL)
 		return NULL;
 
-	POP3Link *pPopLnk = (POP3Link *) SysAlloc(sizeof(POP3Link));
+	POP3Link *pPopLnk = (POP3Link *)SysUtil::SysAlloc(sizeof(POP3Link));
 
 	if (pPopLnk == NULL)
 		return NULL;
@@ -125,7 +125,7 @@ POP3Link *GwLkAllocLink(char const *pszDomain, char const *pszName,
 			char const *pszRmtDomain, char const *pszRmtName,
 			char const *pszRmtPassword, char const *pszAuthType)
 {
-	POP3Link *pPopLnk = (POP3Link *) SysAlloc(sizeof(POP3Link));
+	POP3Link *pPopLnk = (POP3Link *)SysUtil::SysAlloc(sizeof(POP3Link));
 
 	if (pPopLnk == NULL)
 		return NULL;
@@ -142,13 +142,13 @@ POP3Link *GwLkAllocLink(char const *pszDomain, char const *pszName,
 
 void GwLkFreePOP3Link(POP3Link *pPopLnk)
 {
-	SysFree(pPopLnk->pszDomain);
-	SysFree(pPopLnk->pszName);
-	SysFree(pPopLnk->pszRmtDomain);
-	SysFree(pPopLnk->pszRmtName);
-	SysFree(pPopLnk->pszRmtPassword);
-	SysFree(pPopLnk->pszAuthType);
-	SysFree(pPopLnk);
+SysUtil::SysFree(pPopLnk->pszDomain);
+SysUtil::SysFree(pPopLnk->pszName);
+SysUtil::SysFree(pPopLnk->pszRmtDomain);
+SysUtil::SysFree(pPopLnk->pszRmtName);
+SysUtil::SysFree(pPopLnk->pszRmtPassword);
+SysUtil::SysFree(pPopLnk->pszAuthType);
+SysUtil::SysFree(pPopLnk);
 }
 
 static int GwLkWriteLink(FILE *pLnkFile, POP3Link *pPopLnk)
@@ -161,7 +161,7 @@ static int GwLkWriteLink(FILE *pLnkFile, POP3Link *pPopLnk)
 
 	fprintf(pLnkFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Local user */
 	pszQuoted = StrQuote(pPopLnk->pszName, '"');
@@ -171,7 +171,7 @@ static int GwLkWriteLink(FILE *pLnkFile, POP3Link *pPopLnk)
 
 	fprintf(pLnkFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Remote domain */
 	pszQuoted = StrQuote(pPopLnk->pszRmtDomain, '"');
@@ -181,7 +181,7 @@ static int GwLkWriteLink(FILE *pLnkFile, POP3Link *pPopLnk)
 
 	fprintf(pLnkFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Remote user */
 	pszQuoted = StrQuote(pPopLnk->pszRmtName, '"');
@@ -191,7 +191,7 @@ static int GwLkWriteLink(FILE *pLnkFile, POP3Link *pPopLnk)
 
 	fprintf(pLnkFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Remote password */
 	char szPassword[512] = "";
@@ -205,7 +205,7 @@ static int GwLkWriteLink(FILE *pLnkFile, POP3Link *pPopLnk)
 
 	fprintf(pLnkFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	/* Authentication type */
 	pszQuoted = StrQuote(pPopLnk->pszAuthType, '"');
@@ -215,7 +215,7 @@ static int GwLkWriteLink(FILE *pLnkFile, POP3Link *pPopLnk)
 
 	fprintf(pLnkFile, "%s\n", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	return 0;
 }
@@ -598,19 +598,19 @@ int GwLkGetDBFileSnapShot(const char *pszFileName)
 
 GWLKF_HANDLE GwLkOpenDB(void)
 {
-	GwLkDBScanData *pGLSD = (GwLkDBScanData *) SysAlloc(sizeof(GwLkDBScanData));
+	GwLkDBScanData *pGLSD = (GwLkDBScanData *)SysUtil::SysAlloc(sizeof(GwLkDBScanData));
 
 	if (pGLSD == NULL)
 		return INVALID_GWLKF_HANDLE;
 
 	UsrGetTmpFile(NULL, pGLSD->szTmpDBFile, sizeof(pGLSD->szTmpDBFile));
 	if (GwLkGetDBFileSnapShot(pGLSD->szTmpDBFile) < 0) {
-		SysFree(pGLSD);
+	SysUtil::SysFree(pGLSD);
 		return INVALID_GWLKF_HANDLE;
 	}
 	if ((pGLSD->pDBFile = fopen(pGLSD->szTmpDBFile, "rt")) == NULL) {
 		SysRemove(pGLSD->szTmpDBFile);
-		SysFree(pGLSD);
+	SysUtil::SysFree(pGLSD);
 
 		ErrSetErrorCode(ERR_FILE_OPEN);
 		return INVALID_GWLKF_HANDLE;
@@ -625,7 +625,7 @@ void GwLkCloseDB(GWLKF_HANDLE hLinksDB)
 
 	fclose(pGLSD->pDBFile);
 	SysRemove(pGLSD->szTmpDBFile);
-	SysFree(pGLSD);
+SysUtil::SysFree(pGLSD);
 }
 
 POP3Link *GwLkGetFirstUser(GWLKF_HANDLE hLinksDB)

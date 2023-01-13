@@ -64,5 +64,7 @@
 #include "Errors.h"
 
 #include "CommTypes.h"
-
+//DennisThink
+#include "SysUtil.h"
+//
 #endif

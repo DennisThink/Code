@@ -40,7 +40,9 @@
 #include "TabIndex.h"
 #include "MailDomains.h"
 #include "AliasDomain.h"
-
+//DennisThink
+#include "SysUtil.h"
+//
 #define ADOMAIN_FILE                "aliasdomain.tab"
 #define WILD_ADOMAIN_HASH           0
 #define ADOMAIN_LINE_MAX            512
@@ -428,7 +430,7 @@ int ADomGetADomainFileSnapShot(const char *pszFileName)
 
 ADOMAIN_HANDLE ADomOpenDB(void)
 {
-	ADomainScanData *pDSD = (ADomainScanData *) SysAlloc(sizeof(ADomainScanData));
+	ADomainScanData *pDSD = (ADomainScanData *)SysUtil::SysAlloc(sizeof(ADomainScanData));
 
 	if (pDSD == NULL)
 		return INVALID_ADOMAIN_HANDLE;
@@ -436,12 +438,12 @@ ADOMAIN_HANDLE ADomOpenDB(void)
 	UsrGetTmpFile(NULL, pDSD->szTmpDBFile, sizeof(pDSD->szTmpDBFile));
 	if (ADomGetADomainFileSnapShot(pDSD->szTmpDBFile) < 0) {
 		CheckRemoveFile(pDSD->szTmpDBFile);
-		SysFree(pDSD);
+		SysUtil::SysFree(pDSD);
 		return INVALID_ADOMAIN_HANDLE;
 	}
 	if ((pDSD->pDBFile = fopen(pDSD->szTmpDBFile, "rt")) == NULL) {
 		SysRemove(pDSD->szTmpDBFile);
-		SysFree(pDSD);
+		SysUtil::SysFree(pDSD);
 		return INVALID_ADOMAIN_HANDLE;
 	}
 
@@ -458,7 +460,7 @@ void ADomCloseDB(ADOMAIN_HANDLE hDomainsDB)
 	SysRemove(pDSD->szTmpDBFile);
 	if (pDSD->ppszStrings != NULL)
 		StrFreeStrings(pDSD->ppszStrings);
-	SysFree(pDSD);
+	SysUtil::SysFree(pDSD);
 }
 
 char const *const *ADomGetFirstDomain(ADOMAIN_HANDLE hDomainsDB)

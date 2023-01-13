@@ -102,7 +102,7 @@ void ListPurgeFree(HSLIST &hList)
 	PLISTLINK lpCurr;
 
 	while ((lpCurr = ListRemove(hList)) != INVALID_SLIST_PTR)
-		SysFree(lpCurr);
+	SysUtil::SysFree(lpCurr);
 }
 
 void ListPurge(HSLIST &hList)
@@ -132,7 +132,7 @@ PLISTLINK *ListGetPointers(HSLIST &hList, int &iListCount)
 {
 	iListCount = ListGetCount(hList);
 
-	PLISTLINK *pPointers = (PLISTLINK *) SysAlloc((iListCount + 1) * sizeof(PLISTLINK));
+	PLISTLINK *pPointers = (PLISTLINK *)SysUtil::SysAlloc((iListCount + 1) * sizeof(PLISTLINK));
 
 	if (pPointers != NULL) {
 		int i;
@@ -148,6 +148,6 @@ PLISTLINK *ListGetPointers(HSLIST &hList, int &iListCount)
 
 void ListReleasePointers(PLISTLINK * pPointers)
 {
-	SysFree(pPointers);
+SysUtil::SysFree(pPointers);
 }
 

@@ -105,15 +105,15 @@ static int BSckSock_SendFile(void *pPrivate, char const *pszFilePath, SYS_OFF_T 
 
 BSOCK_HANDLE BSckAttach(SYS_SOCKET SockFD, int iBufferSize)
 {
-	BuffSocketData *pBSD = (BuffSocketData *) SysAlloc(sizeof(BuffSocketData));
+	BuffSocketData *pBSD = (BuffSocketData *)SysUtil::SysAlloc(sizeof(BuffSocketData));
 
 	if (pBSD == NULL)
 		return INVALID_BSOCK_HANDLE;
 
-	char *pszBuffer = (char *) SysAlloc(iBufferSize);
+	char *pszBuffer = (char *)SysUtil::SysAlloc(iBufferSize);
 
 	if (pszBuffer == NULL) {
-		SysFree(pBSD);
+	SysUtil::SysFree(pBSD);
 		return INVALID_BSOCK_HANDLE;
 	}
 
@@ -140,8 +140,8 @@ SYS_SOCKET BSckDetach(BSOCK_HANDLE hBSock, int iCloseSocket)
 	if (pBSD != NULL) {
 		SockFD = pBSD->SockFD;
 		BSOCK_FREE(pBSD);
-		SysFree(pBSD->pszBuffer);
-		SysFree(pBSD);
+	SysUtil::SysFree(pBSD->pszBuffer);
+	SysUtil::SysFree(pBSD);
 		if (iCloseSocket) {
 			SysCloseSocket(SockFD);
 			return SYS_INVALID_SOCKET;
@@ -274,7 +274,7 @@ char *BSckGetString(BSOCK_HANDLE hBSock, char *pszBuffer, int iMaxChars, int iTi
 int BSckSendString(BSOCK_HANDLE hBSock, char const *pszBuffer, int iTimeout)
 {
 	BuffSocketData *pBSD = (BuffSocketData *) hBSock;
-	char *pszSendBuffer = (char *) SysAlloc(strlen(pszBuffer) + 3);
+	char *pszSendBuffer = (char *)SysUtil::SysAlloc(strlen(pszBuffer) + 3);
 
 	if (pszSendBuffer == NULL)
 		return ErrGetErrorCode();
@@ -284,10 +284,10 @@ int BSckSendString(BSOCK_HANDLE hBSock, char const *pszBuffer, int iTimeout)
 	int iSendLength = strlen(pszSendBuffer);
 
 	if (BSckWriteLL(pBSD, pszSendBuffer, iSendLength, iTimeout) != iSendLength) {
-		SysFree(pszSendBuffer);
+	SysUtil::SysFree(pszSendBuffer);
 		return ErrGetErrorCode();
 	}
-	SysFree(pszSendBuffer);
+SysUtil::SysFree(pszSendBuffer);
 
 	return iSendLength;
 }
@@ -302,10 +302,10 @@ int BSckVSendString(BSOCK_HANDLE hBSock, int iTimeout, char const *pszFormat, ..
 		return ErrGetErrorCode();
 	if (BSckSendString(hBSock, pszBuffer, iTimeout) < 0) {
 		ErrorPush();
-		SysFree(pszBuffer);
+	SysUtil::SysFree(pszBuffer);
 		return ErrorPop();
 	}
-	SysFree(pszBuffer);
+SysUtil::SysFree(pszBuffer);
 
 	return 0;
 }
@@ -377,7 +377,7 @@ int BSckBufferInit(BSockLineBuffer *pBLB, int iSize)
 {
 	if (iSize <= 0)
 		iSize = BSOCK_STD_BUFFER_SIZE;
-	if ((pBLB->pszBuffer = (char *) SysAlloc(iSize)) == NULL)
+	if ((pBLB->pszBuffer = (char *)SysUtil::SysAlloc(iSize)) == NULL)
 		return ErrGetErrorCode();
 	pBLB->iSize = iSize;
 
@@ -386,7 +386,7 @@ int BSckBufferInit(BSockLineBuffer *pBLB, int iSize)
 
 void BSckBufferFree(BSockLineBuffer *pBLB)
 {
-	SysFree(pBLB->pszBuffer);
+SysUtil::SysFree(pBLB->pszBuffer);
 }
 
 char *BSckBufferGet(BSOCK_HANDLE hBSock, BSockLineBuffer *pBLB, int iTimeout, int *piLnLength)
@@ -400,7 +400,7 @@ char *BSckBufferGet(BSOCK_HANDLE hBSock, BSockLineBuffer *pBLB, int iTimeout, in
 			return NULL;
 		if (!iGotNL) {
 			int iNewSize = 2 * pBLB->iSize + 1;
-			char *pszBuffer = (char *) SysRealloc(pBLB->pszBuffer,
+			char *pszBuffer = (char *)SysUtil::SysRealloc(pBLB->pszBuffer,
 							      (unsigned int) iNewSize);
 
 			if (pszBuffer == NULL)

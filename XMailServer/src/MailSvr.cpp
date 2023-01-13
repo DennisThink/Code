@@ -1281,7 +1281,7 @@ static int SvrSetup(int iArgCount, char *pszArgs[])
 		else
 			StrSNCat(szMailPath, pszValue);
 		DelFinalSlash(szMailPath);
-		SysFree(pszValue);
+	SysUtil::SysFree(pszValue);
 	}
 
 	iNumShCtxs = 0;
@@ -1428,9 +1428,9 @@ static char **SvrMergeArgs(int iArgs, char *pszArgs[], int &iArgsCount)
 
 	if (pszCmdLine != NULL) {
 		ppszCmdArgs = StrGetArgs(pszCmdLine, iCmdArgs);
-		SysFree(pszCmdLine);
+	SysUtil::SysFree(pszCmdLine);
 	}
-	if ((ppszMergeArgs = (char **) SysAlloc((iCmdArgs + iArgs + 1) *
+	if ((ppszMergeArgs = (char **)SysUtil::SysAlloc((iCmdArgs + iArgs + 1) *
 						sizeof(char *))) == NULL) {
 		StrFreeStrings(ppszCmdArgs);
 		return NULL;

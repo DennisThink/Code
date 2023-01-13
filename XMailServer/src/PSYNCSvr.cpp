@@ -77,7 +77,7 @@ static PSYNCConfig *PSYNCGetConfigCopy(SHB_HANDLE hShbPSYNC)
 	if (pPSYNCCfg == NULL)
 		return NULL;
 
-	PSYNCConfig *pNewPSYNCCfg = (PSYNCConfig *) SysAlloc(sizeof(PSYNCConfig));
+	PSYNCConfig *pNewPSYNCCfg = (PSYNCConfig *)SysUtil::SysAlloc(sizeof(PSYNCConfig));
 
 	if (pNewPSYNCCfg != NULL)
 		memcpy(pNewPSYNCCfg, pPSYNCCfg, sizeof(PSYNCConfig));
@@ -171,7 +171,7 @@ unsigned int PSYNCThreadSyncProc(void *pThreadData)
 	POP3Link *pPopLnk = pSTD->pPopLnk;
 	PSYNCConfig *pPSYNCCfg = pSTD->pPSYNCCfg;
 
-	SysFree(pSTD);
+SysUtil::SysFree(pSTD);
 
 	SysLogMessage(LOG_LEV_MESSAGE, "[PSYNC] entry\n");
 
@@ -183,7 +183,7 @@ unsigned int PSYNCThreadSyncProc(void *pThreadData)
 		SysLogMessage(LOG_LEV_MESSAGE, "%s\n", ErrGetErrorString(ErrorFetch()));
 
 		GwLkFreePOP3Link(pPopLnk);
-		SysFree(pPSYNCCfg);
+	SysUtil::SysFree(pPSYNCCfg);
 		/* Notify thread exit semaphore */
 		PSYNCThreadNotifyExit();
 		return ErrorPop();
@@ -210,7 +210,7 @@ unsigned int PSYNCThreadSyncProc(void *pThreadData)
 
 		SvrReleaseConfigHandle(hSvrConfig);
 		GwLkFreePOP3Link(pPopLnk);
-		SysFree(pPSYNCCfg);
+	SysUtil::SysFree(pPSYNCCfg);
 		/* Notify thread exit semaphore */
 		PSYNCThreadNotifyExit();
 		return ErrorPop();
@@ -315,7 +315,7 @@ unsigned int PSYNCThreadSyncProc(void *pThreadData)
 	GwLkLinkUnlock(pPopLnk);
 	SvrReleaseConfigHandle(hSvrConfig);
 	GwLkFreePOP3Link(pPopLnk);
-	SysFree(pPSYNCCfg);
+SysUtil::SysFree(pPSYNCCfg);
 
 	/* Notify thread exit semaphore */
 	PSYNCThreadNotifyExit();
@@ -327,12 +327,12 @@ unsigned int PSYNCThreadSyncProc(void *pThreadData)
 
 static SYS_THREAD PSYNCCreateSyncThread(SHB_HANDLE hShbPSYNC, POP3Link *pPopLnk)
 {
-	PSYNCThreadData *pSTD = (PSYNCThreadData *) SysAlloc(sizeof(PSYNCThreadData));
+	PSYNCThreadData *pSTD = (PSYNCThreadData *)SysUtil::SysAlloc(sizeof(PSYNCThreadData));
 
 	if (pSTD == NULL)
 		return SYS_INVALID_THREAD;
 	if ((pSTD->pPSYNCCfg = PSYNCGetConfigCopy(hShbPSYNC)) == NULL) {
-		SysFree(pSTD);
+	SysUtil::SysFree(pSTD);
 		return SYS_INVALID_THREAD;
 	}
 	pSTD->pPopLnk = pPopLnk;
@@ -340,8 +340,8 @@ static SYS_THREAD PSYNCCreateSyncThread(SHB_HANDLE hShbPSYNC, POP3Link *pPopLnk)
 	SYS_THREAD hThread = SysCreateThread(PSYNCThreadSyncProc, pSTD);
 
 	if (hThread == SYS_INVALID_THREAD) {
-		SysFree(pSTD->pPSYNCCfg);
-		SysFree(pSTD);
+	SysUtil::SysFree(pSTD->pPSYNCCfg);
+	SysUtil::SysFree(pSTD);
 		return SYS_INVALID_THREAD;
 	}
 
@@ -405,20 +405,20 @@ unsigned int PSYNCThreadProc(void *pThreadData)
 		if (pPSYNCCfg == NULL)
 			break;
 		if (pPSYNCCfg->ulFlags & PSYNCF_STOP_SERVER) {
-			SysFree(pPSYNCCfg);
+		SysUtil::SysFree(pPSYNCCfg);
 			break;
 		}
 
 		if ((pPSYNCCfg->iSyncInterval == 0 || iElapsedTime < pPSYNCCfg->iSyncInterval)
 		    && !PSYNCNeedSync()) {
-			SysFree(pPSYNCCfg);
+		SysUtil::SysFree(pPSYNCCfg);
 			continue;
 		}
 		iElapsedTime = 0;
 
 		PSYNCStartTransfer(hShbPSYNC, pPSYNCCfg);
 
-		SysFree(pPSYNCCfg);
+	SysUtil::SysFree(pPSYNCCfg);
 	}
 
 	/* Wait for client completion */

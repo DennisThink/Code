@@ -184,7 +184,7 @@ static SMTPConfig *SMTPGetConfigCopy(SHB_HANDLE hShbSMTP)
 	if (pSMTPCfg == NULL)
 		return NULL;
 
-	SMTPConfig *pSMTPCfgCopy = (SMTPConfig *) SysAlloc(sizeof(SMTPConfig));
+	SMTPConfig *pSMTPCfgCopy = (SMTPConfig *)SysUtil::SysAlloc(sizeof(SMTPConfig));
 
 	if (pSMTPCfgCopy != NULL)
 		memcpy(pSMTPCfgCopy, pSMTPCfg, sizeof(SMTPConfig));
@@ -411,7 +411,7 @@ static int SMTPDoIPBasedInit(SMTPSession &SMTPS, char *&pszSMTPError)
 			if (StrParamGet(pszChkInfo, "code", szMapCode, sizeof(szMapCode) - 1))
 				iMapCode = atoi(szMapCode);
 
-			SysFree(pszChkInfo);
+		SysUtil::SysFree(pszChkInfo);
 		}
 
 		if (iMapCode > 0) {
@@ -447,20 +447,20 @@ static int SMTPDoIPBasedInit(SMTPSession &SMTPS, char *&pszSMTPError)
 					SMTPLogSession(SMTPS, "", "",
 						       (pszError !=
 							NULL) ? pszError : "SNDRIP=EIPMAP", 0);
-					SysFree(pszError);
+				SysUtil::SysFree(pszError);
 				}
 				if ((pszCfgError =
 				     SvrGetConfigVar(SMTPS.hSvrConfig,
 						     "SmtpMsgIPBanMaps")) != NULL) {
 					pszSMTPError =
 						StrSprint("%s (%s)", pszCfgError, SMTPS.szRejMapName);
-					SysFree(pszCfgError);
+				SysUtil::SysFree(pszCfgError);
 				} else
 					pszSMTPError =
 						StrSprint
 						("550 Denied due inclusion of your IP inside (%s)",
 						 SMTPS.szRejMapName);
-				SysFree(pszMapsList);
+			SysUtil::SysFree(pszMapsList);
 				return ErrorPop();
 			}
 			if (iMapCode == 0)
@@ -468,7 +468,7 @@ static int SMTPDoIPBasedInit(SMTPSession &SMTPS, char *&pszSMTPError)
 			else
 				SMTPS.iCmdDelay = Max(SMTPS.iCmdDelay, Abs(iMapCode));
 		}
-		SysFree(pszMapsList);
+	SysUtil::SysFree(pszMapsList);
 	}
 	/* RDNS client check */
 	int iCheckValue = SvrGetConfigInt("SMTP-RDNSCheck", 0, SMTPS.hSvrConfig);
@@ -603,7 +603,7 @@ static int SMTPInitSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock,
 	if (pszSvrDomain != NULL) {
 		StrSNCpy(SMTPS.szSvrDomain, pszSvrDomain);
 		StrSNCpy(SMTPS.szSvrFQDN, pszSvrDomain);
-		SysFree(pszSvrDomain);
+	SysUtil::SysFree(pszSvrDomain);
 	} else {
 		if (SysGetHostByAddr(SMTPS.SockInfo, SMTPS.szSvrFQDN, sizeof(SMTPS.szSvrFQDN)) < 0)
 			StrSNCpy(SMTPS.szSvrFQDN, SysInetNToA(SMTPS.SockInfo, szIP,
@@ -624,7 +624,7 @@ static int SMTPInitSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock,
 				return ERR_NO_DOMAIN;
 			}
 			StrSNCpy(SMTPS.szSvrDomain, pszSvrDomain);
-			SysFree(pszSvrDomain);
+		SysUtil::SysFree(pszSvrDomain);
 		}
 	}
 
@@ -661,7 +661,7 @@ static int SMTPInitSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock,
 	}
 	if (pszSvrConfig != NULL) {
 		SMTPLoadConfig(SMTPS, pszSvrConfig);
-		SysFree(pszSvrConfig);
+	SysUtil::SysFree(pszSvrConfig);
 	}
 
 	SMTPS.ulFlags |= SMTPS.ulSetupFlags;
@@ -729,7 +729,7 @@ static int SMTPGetUserSmtpPerms(UserInfo *pUI, SVRCFG_HANDLE hSvrConfig, char *p
 
 	if (pszUserPerms != NULL) {
 		StrNCpy(pszPerms, pszUserPerms, iMaxPerms);
-		SysFree(pszUserPerms);
+	SysUtil::SysFree(pszUserPerms);
 	} else {
 		/* Match found, get the default permissions */
 		char *pszDefultPerms = SvrGetConfigVar(hSvrConfig,
@@ -737,7 +737,7 @@ static int SMTPGetUserSmtpPerms(UserInfo *pUI, SVRCFG_HANDLE hSvrConfig, char *p
 
 		if (pszDefultPerms != NULL) {
 			StrNCpy(pszPerms, pszDefultPerms, iMaxPerms);
-			SysFree(pszDefultPerms);
+		SysUtil::SysFree(pszDefultPerms);
 		} else
 			SetEmptyString(pszPerms);
 	}
@@ -760,7 +760,7 @@ static int SMTPApplyUserConfig(SMTPSession &SMTPS, UserInfo *pUI)
 	if ((pszValue = UsrGetUserInfoVar(pUI, "MaxMessageSize")) != NULL) {
 		SMTPS.ulMaxMsgSize = 1024 * (unsigned long) atol(pszValue);
 
-		SysFree(pszValue);
+	SysUtil::SysFree(pszValue);
 	}
 	/* Check if the emission of "X-Auth-User:" is diabled */
 	if ((pszValue = UsrGetUserInfoVar(pUI, "DisableEmitAuthUser")) != NULL) {
@@ -768,7 +768,7 @@ static int SMTPApplyUserConfig(SMTPSession &SMTPS, UserInfo *pUI)
 			SMTPS.ulFlags |= SMTPF_NOEMIT_AUTH;
 		else
 			SMTPS.ulFlags &= ~SMTPF_NOEMIT_AUTH;
-		SysFree(pszValue);
+	SysUtil::SysFree(pszValue);
 	}
 
 	return 0;
@@ -786,18 +786,18 @@ static int SMTPSendError(BSOCK_HANDLE hBSock, SMTPSession &SMTPS, char const *ps
 	if (SMTPS.pszCustMsg == NULL) {
 		if (BSckSendString(hBSock, pszBuffer, SMTPS.pSMTPCfg->iTimeout) < 0) {
 			ErrorPush();
-			SysFree(pszBuffer);
+		SysUtil::SysFree(pszBuffer);
 			return ErrorPop();
 		}
 	} else {
 		if (BSckVSendString(hBSock, SMTPS.pSMTPCfg->iTimeout,
 				    "%s - %s", pszBuffer, SMTPS.pszCustMsg) < 0) {
 			ErrorPush();
-			SysFree(pszBuffer);
+		SysUtil::SysFree(pszBuffer);
 			return ErrorPop();
 		}
 	}
-	SysFree(pszBuffer);
+SysUtil::SysFree(pszBuffer);
 
 	/*
 	 * Increase the number of errors we encountered in this session. If the
@@ -904,7 +904,7 @@ static int SMTPCheckReturnPath(char const *pszCommand, char **ppszRetDomains,
 			ErrSetErrorCode(ERR_BAD_RETURN_PATH);
 			return ERR_BAD_RETURN_PATH;
 		}
-		SysFree(SMTPS.pszFrom);
+	SysUtil::SysFree(SMTPS.pszFrom);
 
 		SMTPS.pszFrom = SysStrDup("");
 
@@ -955,7 +955,7 @@ static int SMTPCheckReturnPath(char const *pszCommand, char **ppszRetDomains,
 		return ErrGetErrorCode();
 
 	/* Setup From string */
-	SysFree(SMTPS.pszFrom);
+SysUtil::SysFree(SMTPS.pszFrom);
 	SMTPS.pszFrom = SysStrDup(ppszRetDomains[0]);
 
 	return 0;
@@ -1009,7 +1009,7 @@ static int SMTPHandleCmd_MAIL(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 		SMTPResetSession(SMTPS);
 
 		SMTPSendError(hBSock, SMTPS, "%s", pszSMTPError);
-		SysFree(pszSMTPError);
+	SysUtil::SysFree(pszSMTPError);
 		return ErrorPop();
 	}
 	StrFreeStrings(ppszRetDomains);
@@ -1025,7 +1025,7 @@ static int SMTPHandleCmd_MAIL(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 					       (pszError != NULL) ? pszError : "SNDRIP=EIPMAP",
 					       0);
 
-				SysFree(pszError);
+			SysUtil::SysFree(pszError);
 			} else if (SMTPS.ulFlags & SMTPF_NORDNS_IP) {
 				SMTPLogSession(SMTPS, SMTPS.pszFrom, "", "SNDRIP=ERDNS", 0);
 			} else
@@ -1040,7 +1040,7 @@ static int SMTPHandleCmd_MAIL(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 			SMTPSendError(hBSock, SMTPS, "551 Server access forbidden by your IP");
 		else {
 			SMTPSendError(hBSock, SMTPS, "%s", pszSMTPError);
-			SysFree(pszSMTPError);
+		SysUtil::SysFree(pszSMTPError);
 		}
 
 		ErrSetErrorCode(ERR_SMTP_USE_FORBIDDEN);
@@ -1300,7 +1300,7 @@ static int SMTPRunFilters(SMTPSession &SMTPS, char const *pszFilterPath, char co
 			if (bFilterLogEnabled)
 				SMTPLogFilter(SMTPS, Toks.ppszCmdTokens, -1,
 					      -1, pszType, pszPEError);
-			SysFree(pszPEError);
+		SysUtil::SysFree(pszPEError);
 			StrFreeStrings(ppszCmdTokens);
 			continue;
 		}
@@ -1567,7 +1567,7 @@ static int SMTPCheckForwardPath(char **ppszFwdDomains, SMTPSession &SMTPS,
 	 * Setup SendRcpt string (it'll be used to build "RCPT TO:<>" line into
 	 * the message file)
 	 */
-	SysFree(SMTPS.pszSendRcpt);
+SysUtil::SysFree(SMTPS.pszSendRcpt);
 
 	if ((SMTPS.pszSendRcpt = USmtpBuildRcptPath(ppszFwdDomains, SMTPS.hSvrConfig)) == NULL) {
 		ErrorPush();
@@ -1584,7 +1584,7 @@ static int SMTPCheckForwardPath(char **ppszFwdDomains, SMTPSession &SMTPS,
 	 * Setup Rcpt string. This needs to be done before filter execution,
 	 * since the CRCPT macro substitution needs that information.
 	 */
-	SysFree(SMTPS.pszRcpt);
+SysUtil::SysFree(SMTPS.pszRcpt);
 	SMTPS.pszRcpt = SysStrDup(ppszFwdDomains[0]);
 
 	/* Setup the Real Rcpt string */
@@ -1617,7 +1617,7 @@ static char **SMTPGetForwardPath(char const *pszCommand, SMTPSession &SMTPS)
 			pszRename = SvrGetConfigVar(SMTPS.hSvrConfig, "PostMaster");
 
 		if (pszRename != NULL) {
-			SysFree(ppszFwdDomains[iCount - 1]);
+		SysUtil::SysFree(ppszFwdDomains[iCount - 1]);
 			ppszFwdDomains[iCount - 1] = pszRename;
 		}
 	}
@@ -1669,7 +1669,7 @@ static int SMTPHandleCmd_RCPT(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 		StrFreeStrings(ppszFwdDomains);
 
 		SMTPSendError(hBSock, SMTPS, "%s", pszSMTPError);
-		SysFree(pszSMTPError);
+	SysUtil::SysFree(pszSMTPError);
 		return ErrorPop();
 	}
 	StrFreeStrings(ppszFwdDomains);
@@ -1704,7 +1704,7 @@ static int SMTPAddReceived(int iType, char const *pszAuth, char const *const *pp
 	/* Write "Received:" tag */
 	fputs(pszReceived, pMailFile);
 
-	SysFree(pszReceived);
+SysUtil::SysFree(pszReceived);
 
 	return 0;
 }
@@ -1916,7 +1916,7 @@ static int SMTPHandleCmd_DATA(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 
 		if (pszError != NULL) {
 			SMTPSendError(hBSock, SMTPS, "%s", pszError);
-			SysFree(pszError);
+		SysUtil::SysFree(pszError);
 		} else
 			BSckSendString(hBSock, "554 Transaction failed",
 				       SMTPS.pSMTPCfg->iTimeout);
@@ -2004,7 +2004,7 @@ static int SMTPHandleCmd_DATA(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 
 			if (pszError != NULL) {
 				SMTPSendError(hBSock, SMTPS, "%s", pszError);
-				SysFree(pszError);
+			SysUtil::SysFree(pszError);
 			} else
 				BSckSendString(hBSock, "554 Transaction failed",
 					       SMTPS.pSMTPCfg->iTimeout);
@@ -2081,7 +2081,7 @@ static int SMTPHandleCmd_HELO(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 
 	BSckVSendString(hBSock, SMTPS.pSMTPCfg->iTimeout, "250 %s", pszDomain);
 
-	SysFree(pszDomain);
+SysUtil::SysFree(pszDomain);
 
 	SMTPS.iSMTPState = stateHelo;
 
@@ -2173,7 +2173,7 @@ static int SMTPListAuths(DynString *pDS, SMTPSession &SMTPS, int iLinkSSL)
 		for (i = 0; i < iNumAuths; i++) {
 			StrDynAdd(pDS, " ");
 			StrDynAdd(pDS, pszAuths[i]);
-			SysFree(pszAuths[i]);
+		SysUtil::SysFree(pszAuths[i]);
 		}
 		StrDynAdd(pDS, "\r\n");
 	}
@@ -2195,7 +2195,7 @@ static int SMTPSendMultilineResponse(BSOCK_HANDLE hBSock, int iTimeout, char con
 
 	iError = BSckSendData(hBSock, pszDResp, strlen(pszDResp), iTimeout);
 
-	SysFree(pszDResp);
+SysUtil::SysFree(pszDResp);
 
 	return iError;
 }
@@ -2250,7 +2250,7 @@ static int SMTPHandleCmd_EHLO(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 	}
 	/* Build EHLO response file ( domain + auths ) */
 	StrDynPrint(&DynS, "250 %s\r\n", pszDomain);
-	SysFree(pszDomain);
+SysUtil::SysFree(pszDomain);
 
 	/* Emit extended SMTP command and internal auths */
 	int iLinkSSL = strcmp(BSckBioName(hBSock), BSSL_BIO_NAME) == 0;
@@ -2467,7 +2467,7 @@ static int SMTPExternalAuthenticate(BSOCK_HANDLE hBSock, SMTPSession &SMTPS,
 		 * be a C-string.
 		 */
 		MscParseOptions((char *) pRData, SMTPAssignExtPerms, &SMTPS);
-		SysFree(pRData);
+	SysUtil::SysFree(pRData);
 	}
 
 	return 0;
@@ -3065,7 +3065,7 @@ static int SMTPHandleCmd_VRFY(char const *pszCommand, BSOCK_HANDLE hBSock, SMTPS
 		BSckVSendString(hBSock, SMTPS.pSMTPCfg->iTimeout,
 				"250 %s <%s@%s>", pszRealName, pUI->pszName, pUI->pszDomain);
 
-		SysFree(pszRealName);
+	SysUtil::SysFree(pszRealName);
 		UsrFreeUserInfo(pUI);
 	} else {
 		if (USmlIsCmdAliasAccount(szVrfyDomain, szVrfyUser) < 0) {
@@ -3173,7 +3173,7 @@ static int SMTPHandleSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock)
 		if (pszSMTPError != NULL) {
 			BSckSendString(hBSock, pszSMTPError, STD_SMTP_TIMEOUT);
 
-			SysFree(pszSMTPError);
+		SysUtil::SysFree(pszSMTPError);
 		} else
 			BSckVSendString(hBSock, STD_SMTP_TIMEOUT,
 					"421 %s service not available (%d), closing transmission channel",
@@ -3231,7 +3231,7 @@ unsigned int SMTPClientThread(void *pThreadData)
 	if (hBSock == INVALID_BSOCK_HANDLE) {
 		ErrorPush();
 		SysCloseSocket(pThCtx->SockFD);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -3246,7 +3246,7 @@ unsigned int SMTPClientThread(void *pThreadData)
 		if (CSslBindSetup(&SSLB) < 0) {
 			ErrorPush();
 			BSckDetach(hBSock, 1);
-			SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 			return ErrorPop();
 		}
 		ZeroData(SslE);
@@ -3257,15 +3257,15 @@ unsigned int SMTPClientThread(void *pThreadData)
 		if (iError < 0) {
 			ErrorPush();
 			BSckDetach(hBSock, 1);
-			SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 			return ErrorPop();
 		}
 		/*
 		 * We may want to add verify code here ...
 		 */
 
-		SysFree(SslE.pszIssuer);
-		SysFree(SslE.pszSubject);
+	SysUtil::SysFree(SslE.pszIssuer);
+	SysUtil::SysFree(SslE.pszSubject);
 	}
 
 	/* Increase threads count */
@@ -3277,7 +3277,7 @@ unsigned int SMTPClientThread(void *pThreadData)
 				SMTP_SERVER_NAME, ErrGetErrorString(ErrorFetch()));
 
 		BSckDetach(hBSock, 1);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -3289,7 +3289,7 @@ unsigned int SMTPClientThread(void *pThreadData)
 
 	/* Unlink socket from the bufferer and close it */
 	BSckDetach(hBSock, 1);
-	SysFree(pThCtx);
+SysUtil::SysFree(pThCtx);
 
 	return 0;
 }

@@ -35,7 +35,7 @@ void *StrMemDup(void const *pData, long lSize, long lExtra)
 
 	if (lSize < 0)
 		lSize = strlen((char const *) pData) + 1;
-	if ((pDData = SysAllocNZ(lSize + lExtra)) == NULL)
+	if ((pDData =SysUtil::SysAllocNZ(lSize + lExtra)) == NULL)
 		return NULL;
 	memcpy(pDData, pData, lSize);
 	memset((char *) pDData + lSize, 0, lExtra);
@@ -84,7 +84,7 @@ char **StrGetArgs(char const *pszCmdLine, int &iArgsCount)
 
 	for (iArgsCount = 0; StrCmdLineToken(pszCLine, szToken) == 0; iArgsCount++);
 
-	char **ppszArgs = (char **) SysAlloc((iArgsCount + 1) * sizeof(char *));
+	char **ppszArgs = (char **)SysUtil::SysAlloc((iArgsCount + 1) * sizeof(char *));
 
 	if (ppszArgs == NULL)
 		return NULL;
@@ -182,7 +182,7 @@ char **StrBuildList(char const *pszString, ...)
 	va_end(Args);
 
 	int iStrCurr = 0;
-	char **ppszStrings = (char **) SysAlloc((iNumString + 1) * sizeof(char *));
+	char **ppszStrings = (char **)SysUtil::SysAlloc((iNumString + 1) * sizeof(char *));
 
 	if (ppszStrings == NULL)
 		return NULL;
@@ -219,10 +219,10 @@ char **StrTokenize(const char *pszString, const char *pszTokenizer)
 		pszToken = SysStrTok(NULL, pszTokenizer, &pszSavePtr);
 	}
 
-	char **ppszTokens = (char **) SysAlloc((iTokenCount + 1) * sizeof(char *));
+	char **ppszTokens = (char **)SysUtil::SysAlloc((iTokenCount + 1) * sizeof(char *));
 
 	if (ppszTokens == NULL) {
-		SysFree(pszBuffer);
+	SysUtil::SysFree(pszBuffer);
 		return NULL;
 	}
 
@@ -236,7 +236,7 @@ char **StrTokenize(const char *pszString, const char *pszTokenizer)
 		pszToken = SysStrTok(NULL, pszTokenizer, &pszSavePtr);
 	}
 	ppszTokens[iTokenCount] = NULL;
-	SysFree(pszBuffer);
+SysUtil::SysFree(pszBuffer);
 
 	return ppszTokens;
 }
@@ -245,8 +245,8 @@ void StrFreeStrings(char **ppszStrings)
 {
 	if (ppszStrings != NULL)
 		for (int i = 0; ppszStrings[i] != NULL; i++)
-			SysFree(ppszStrings[i]);
-	SysFree(ppszStrings);
+		SysUtil::SysFree(ppszStrings[i]);
+SysUtil::SysFree(ppszStrings);
 }
 
 int StrStringsCount(char const *const *ppszStrings)
@@ -301,7 +301,7 @@ char *StrConcat(char const *const *ppszStrings, char const *pszCStr)
 	for (i = 0; i < iStrCount; i++)
 		iSumLength += strlen(ppszStrings[i]) + iCStrLength;
 
-	char *pszConcat = (char *) SysAlloc(iSumLength + 1);
+	char *pszConcat = (char *)SysUtil::SysAlloc(iSumLength + 1);
 
 	if (pszConcat == NULL)
 		return NULL;
@@ -340,7 +340,7 @@ char *StrQuote(const char *pszString, int iChar)
 		if (pszString[i] == iChar)
 			iQSize++;
 
-	char *pszBuffer = (char *) SysAlloc(3 + iQSize);
+	char *pszBuffer = (char *)SysUtil::SysAlloc(3 + iQSize);
 
 	if (pszBuffer == NULL)
 		return NULL;
@@ -459,7 +459,7 @@ int StrIWildMatch(char const *pszString, char const *pszMatch)
 	char *pszLowMatch = SysStrDup(pszMatch);
 
 	if (pszLowMatch == NULL) {
-		SysFree(pszLowString);
+	SysUtil::SysFree(pszLowString);
 		return 0;
 	}
 
@@ -468,8 +468,8 @@ int StrIWildMatch(char const *pszString, char const *pszMatch)
 
 	int iMatchResult = StrWildMatch(pszLowString, pszLowMatch);
 
-	SysFree(pszLowMatch);
-	SysFree(pszLowString);
+SysUtil::SysFree(pszLowMatch);
+SysUtil::SysFree(pszLowString);
 
 	return iMatchResult;
 }
@@ -479,7 +479,7 @@ char *StrLoadFile(FILE *pFile)
 	fseek(pFile, 0, SEEK_END);
 
 	unsigned int uFileSize = (unsigned int) ftell(pFile);
-	char *pszData = (char *) SysAlloc(uFileSize + 1);
+	char *pszData = (char *)SysUtil::SysAlloc(uFileSize + 1);
 
 	if (pszData == NULL)
 		return NULL;
@@ -636,7 +636,7 @@ int StrDynInit(DynString *pDS, char const *pszInit)
 	pDS->iStringSize = iInitLength;
 	pDS->iBufferSize = Max(2 * iInitLength, MIN_DYNSTR_INCR);
 
-	if ((pDS->pszBuffer = (char *) SysAlloc(pDS->iBufferSize)) == NULL)
+	if ((pDS->pszBuffer = (char *)SysUtil::SysAlloc(pDS->iBufferSize)) == NULL)
 		return ErrGetErrorCode();
 	memcpy(pDS->pszBuffer, pszInit, iInitLength);
 
@@ -645,7 +645,7 @@ int StrDynInit(DynString *pDS, char const *pszInit)
 
 int StrDynFree(DynString *pDS)
 {
-	SysFree(pDS->pszBuffer);
+SysUtil::SysFree(pDS->pszBuffer);
 
 	return 0;
 }
@@ -687,13 +687,13 @@ int StrDynAdd(DynString *pDS, char const *pszBuffer, int iStringSize)
 		iStringSize = strlen(pszBuffer);
 	if ((pDS->iStringSize + iStringSize) >= pDS->iBufferSize) {
 		int iNewSize = pDS->iBufferSize + Max(2 * iStringSize, MIN_DYNSTR_INCR);
-		char *pszNewBuffer = (char *) SysAlloc(iNewSize);
+		char *pszNewBuffer = (char *)SysUtil::SysAlloc(iNewSize);
 
 		if (pszNewBuffer == NULL)
 			return ErrGetErrorCode();
 
 		memcpy(pszNewBuffer, pDS->pszBuffer, pDS->iStringSize);
-		SysFree(pDS->pszBuffer);
+	SysUtil::SysFree(pDS->pszBuffer);
 		pDS->pszBuffer = pszNewBuffer;
 		pDS->iBufferSize = iNewSize;
 	}
@@ -713,14 +713,14 @@ int StrDynPrint(DynString *pDS, char const *pszFormat, ...)
 
 	int iAddResult = StrDynAdd(pDS, pszMessage);
 
-	SysFree(pszMessage);
+SysUtil::SysFree(pszMessage);
 
 	return iAddResult;
 }
 
 char *StrNDup(char const *pszStr, int iSize)
 {
-	char *pszDupStr = (char *) SysAlloc(iSize + 1);
+	char *pszDupStr = (char *)SysUtil::SysAlloc(iSize + 1);
 
 	if (pszDupStr != NULL)
 		Cpy2Sz(pszDupStr, pszStr, iSize);
@@ -778,7 +778,7 @@ char *StrMacSubst(char const *pszIn, int *piSize,
 			if ((pszLkup = (*pLkupProc)(pPriv, pszVarS, pszVarE - pszVarS)) == NULL ||
 			    StrDynAdd(&DynS, pszLkup, -1) < 0)
 				goto ErrorExit;
-			SysFree(pszLkup);
+		SysUtil::SysFree(pszLkup);
 			pszLkup = NULL;
 			i = pszVarE - pszIn;
 		} else
@@ -795,7 +795,7 @@ char *StrMacSubst(char const *pszIn, int *piSize,
 	return StrDynDrop(&DynS, piSize);
 
 ErrorExit:
-	SysFree(pszLkup);
+SysUtil::SysFree(pszLkup);
 	StrDynFree(&DynS);
 	return NULL;
 }

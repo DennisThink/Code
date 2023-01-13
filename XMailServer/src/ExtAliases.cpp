@@ -97,7 +97,7 @@ static ExtAlias *ExAlGetAliasFromStrings(char **ppszStrings)
 	if (iFieldsCount < ealMax)
 		return NULL;
 
-	ExtAlias *pExtAlias = (ExtAlias *) SysAlloc(sizeof(ExtAlias));
+	ExtAlias *pExtAlias = (ExtAlias *)SysUtil::SysAlloc(sizeof(ExtAlias));
 
 	if (pExtAlias == NULL)
 		return NULL;
@@ -112,7 +112,7 @@ static ExtAlias *ExAlGetAliasFromStrings(char **ppszStrings)
 
 ExtAlias *ExAlAllocAlias(void)
 {
-	ExtAlias *pExtAlias = (ExtAlias *) SysAlloc(sizeof(ExtAlias));
+	ExtAlias *pExtAlias = (ExtAlias *)SysUtil::SysAlloc(sizeof(ExtAlias));
 
 	if (pExtAlias == NULL)
 		return NULL;
@@ -127,11 +127,11 @@ ExtAlias *ExAlAllocAlias(void)
 
 void ExAlFreeAlias(ExtAlias * pExtAlias)
 {
-	SysFree(pExtAlias->pszDomain);
-	SysFree(pExtAlias->pszName);
-	SysFree(pExtAlias->pszRmtDomain);
-	SysFree(pExtAlias->pszRmtName);
-	SysFree(pExtAlias);
+	SysUtil::SysFree(pExtAlias->pszDomain);
+	SysUtil::SysFree(pExtAlias->pszName);
+	SysUtil::SysFree(pExtAlias->pszRmtDomain);
+	SysUtil::SysFree(pExtAlias->pszRmtName);
+	SysUtil::SysFree(pExtAlias);
 }
 
 static int ExAlWriteAlias(FILE * pAliasFile, ExtAlias * pExtAlias)
@@ -144,7 +144,7 @@ static int ExAlWriteAlias(FILE * pAliasFile, ExtAlias * pExtAlias)
 
 	fprintf(pAliasFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+	SysUtil::SysFree(pszQuoted);
 
 	/* Remote user */
 	pszQuoted = StrQuote(pExtAlias->pszRmtName, '"');
@@ -154,7 +154,7 @@ static int ExAlWriteAlias(FILE * pAliasFile, ExtAlias * pExtAlias)
 
 	fprintf(pAliasFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+	SysUtil::SysFree(pszQuoted);
 
 	/* Domain */
 	pszQuoted = StrQuote(pExtAlias->pszDomain, '"');
@@ -164,7 +164,7 @@ static int ExAlWriteAlias(FILE * pAliasFile, ExtAlias * pExtAlias)
 
 	fprintf(pAliasFile, "%s\t", pszQuoted);
 
-	SysFree(pszQuoted);
+	SysUtil::SysFree(pszQuoted);
 
 	/* Local user */
 	pszQuoted = StrQuote(pExtAlias->pszName, '"');
@@ -174,7 +174,7 @@ static int ExAlWriteAlias(FILE * pAliasFile, ExtAlias * pExtAlias)
 
 	fprintf(pAliasFile, "%s\n", pszQuoted);
 
-	SysFree(pszQuoted);
+	SysUtil::SysFree(pszQuoted);
 
 	return 0;
 }
@@ -547,19 +547,19 @@ int ExAlGetDBFileSnapShot(const char *pszFileName)
 
 EXAL_HANDLE ExAlOpenDB(void)
 {
-	ExAlDBScanData *pGLSD = (ExAlDBScanData *) SysAlloc(sizeof(ExAlDBScanData));
+	ExAlDBScanData *pGLSD = (ExAlDBScanData *)SysUtil::SysAlloc(sizeof(ExAlDBScanData));
 
 	if (pGLSD == NULL)
 		return INVALID_EXAL_HANDLE;
 
 	UsrGetTmpFile(NULL, pGLSD->szTmpDBFile, sizeof(pGLSD->szTmpDBFile));
 	if (ExAlGetDBFileSnapShot(pGLSD->szTmpDBFile) < 0) {
-		SysFree(pGLSD);
+		SysUtil::SysFree(pGLSD);
 		return INVALID_EXAL_HANDLE;
 	}
 	if ((pGLSD->pDBFile = fopen(pGLSD->szTmpDBFile, "rt")) == NULL) {
 		SysRemove(pGLSD->szTmpDBFile);
-		SysFree(pGLSD);
+		SysUtil::SysFree(pGLSD);
 		return INVALID_EXAL_HANDLE;
 	}
 
@@ -572,7 +572,7 @@ void ExAlCloseDB(EXAL_HANDLE hLinksDB)
 
 	fclose(pGLSD->pDBFile);
 	SysRemove(pGLSD->szTmpDBFile);
-	SysFree(pGLSD);
+	SysUtil::SysFree(pGLSD);
 }
 
 ExtAlias *ExAlGetFirstAlias(EXAL_HANDLE hLinksDB)

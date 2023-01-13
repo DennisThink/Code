@@ -52,7 +52,7 @@
 #define Cpy2Sz(d, s, n)         do { memcpy(d, s, (n) * sizeof(*(s))); (d)[n] = 0; } while (0)
 #define StrEnd(s)               ((char *) (s) + strlen(s))
 #define CheckRemoveFile(fp)     ((SysExistFile(fp)) ? SysRemove(fp) : 0)
-#define SysFreeNullify(p)       do { SysFree(p), (p) = NULL; } while(0)
+#define SysFreeNullify(p)       do { SysUtil::SysFree(p), (p) = NULL; } while(0)
 #define FCloseNullify(f)        do { if ((f) != NULL) fclose(f); (f) = NULL; } while (0)
 #define ErrorSet(e)             (ErrSetErrorCode(e), e)
 #define ErrorPush()             int __iPushedError = ErrGetErrorCode()
@@ -72,7 +72,7 @@
 		int iPSize, iCurrSize = 256;				\
 		va_list Args;						\
 		for (;;) {						\
-			if ((r = (char *) SysAlloc(iCurrSize)) == NULL)	\
+			if ((r = (char *) SysUtil::SysAlloc(iCurrSize)) == NULL)	\
 				break;					\
 			va_start(Args, l);				\
 			if ((iPSize = SysVSNPrintf(r, iCurrSize - 1, f, Args)) >= 0 && \
@@ -85,7 +85,7 @@
 				iCurrSize = (4 * iPSize) / 3 + 2;	\
 			else						\
 				iCurrSize *= 2;				\
-			SysFree(r);					\
+			SysUtil::SysFree(r);					\
 		}							\
 	} while (0)
 

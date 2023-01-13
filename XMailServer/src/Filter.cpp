@@ -100,7 +100,7 @@ int FilLogFilter(FilterLogInfo const *pFLI)
 	RLCK_HANDLE hResLock = RLckLockEX(SVR_LOGS_DIR SYS_SLASH_STR FILTER_LOG_FILE);
 
 	if (hResLock == INVALID_RLCK_HANDLE) {
-		SysFree(pszExStr);
+	SysUtil::SysFree(pszExStr);
 		return ErrGetErrorCode();
 	}
 
@@ -124,7 +124,7 @@ int FilLogFilter(FilterLogInfo const *pFLI)
 		   pFLI->iExitCode, pszExStr);
 
 	RLckUnlockEX(hResLock);
-	SysFree(pszExStr);
+SysUtil::SysFree(pszExStr);
 
 	return 0;
 }
@@ -299,7 +299,7 @@ static int FilSelectFilters(char const *pszFilterFilePath, char const *pszMode,
 static void FilFreeFilters(char **ppszFilters, int iNumFilters)
 {
 	for (iNumFilters--; iNumFilters >= 0; iNumFilters--)
-		SysFree(ppszFilters[iNumFilters]);
+	SysUtil::SysFree(ppszFilters[iNumFilters]);
 
 }
 
@@ -483,7 +483,7 @@ static int FilApplyFilter(char const *pszFilterPath, SPLF_HANDLE hFSpool,
 			if (bFilterLogEnabled)
 				FilLogExec(FMI, Toks.ppszCmdTokens, -1,
 					   -1, pszType, pszPEError);
-			SysFree(pszPEError);
+		SysUtil::SysFree(pszPEError);
 			StrFreeStrings(ppszCmdTokens);
 			continue;
 		}
@@ -533,7 +533,7 @@ static int FilApplyFilter(char const *pszFilterPath, SPLF_HANDLE hFSpool,
 					QueCleanupMessage(hQueue, hMessage, false);
 
 				StrFreeStrings(ppszCmdTokens);
-				SysFree(pszRejMsg);
+			SysUtil::SysFree(pszRejMsg);
 
 				ErrSetErrorCode(ERR_FILTERED_MESSAGE);
 				return ERR_FILTERED_MESSAGE;

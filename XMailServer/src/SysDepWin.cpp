@@ -1062,14 +1062,14 @@ static unsigned int SysThreadRunner(void *pRunData)
 	ThreadRunner *pTR = (ThreadRunner *) pRunData;
 
 	if (SysThreadSetup((SYS_THREAD) GetCurrentThread()) < 0) {
-		SysFree(pTR);
+		SysUtil::SysFree(pTR);
 		return ErrGetErrorCode();
 	}
 
 	unsigned int uResultCode = (*pTR->pThreadProc)(pTR->pThreadData);
 
 	SysThreadCleanup((SYS_THREAD) GetCurrentThread());
-	SysFree(pTR);
+	SysUtil::SysFree(pTR);
 
 	return uResultCode;
 }
@@ -1077,7 +1077,7 @@ static unsigned int SysThreadRunner(void *pRunData)
 SYS_THREAD SysCreateThread(unsigned int (*pThreadProc) (void *), void *pThreadData)
 {
 	/* Alloc thread runner data */
-	ThreadRunner *pTR = (ThreadRunner *) SysAlloc(sizeof(ThreadRunner));
+	ThreadRunner *pTR = (ThreadRunner *)SysUtil::SysAlloc(sizeof(ThreadRunner));
 
 	if (pTR == NULL)
 		return SYS_INVALID_THREAD;
@@ -1092,7 +1092,7 @@ SYS_THREAD SysCreateThread(unsigned int (*pThreadProc) (void *), void *pThreadDa
 						pTR, 0, &uThreadId);
 
 	if (ulThread == 0) {
-		SysFree(pTR);
+		SysUtil::SysFree(pTR);
 		ErrSetErrorCode(ERR_BEGINTHREADEX);
 		return SYS_INVALID_THREAD;
 	}
@@ -1158,7 +1158,7 @@ int SysExec(char const *pszCommand, char const *const *pszArgs, int iWaitTimeout
 	for (i = 1; pszArgs[i] != NULL; i++)
 		iCommandLength += strlen(pszArgs[i]) + 4;
 
-	char *pszCmdLine = (char *) SysAlloc(iCommandLength + 1);
+	char *pszCmdLine = (char *)SysUtil::SysAlloc(iCommandLength + 1);
 
 	if (pszCmdLine == NULL)
 		return ErrGetErrorCode();
@@ -1178,7 +1178,7 @@ int SysExec(char const *pszCommand, char const *const *pszArgs, int iWaitTimeout
 					     CREATE_NO_WINDOW | NORMAL_PRIORITY_CLASS,
 					     NULL, NULL, &SI, &PI);
 
-	SysFree(pszCmdLine);
+	SysUtil::SysFree(pszCmdLine);
 	if (!bProcessCreated) {
 		ErrSetErrorCode(ERR_PROCESS_EXECUTE);
 		return ERR_PROCESS_EXECUTE;
@@ -1317,7 +1317,7 @@ void SysThreadOnce(SYS_THREAD_ONCE *pThrOnce, void (*pOnceProc) (void))
 		Sleep(0);
 }
 
-void *SysAllocNZ(unsigned int uSize)
+/*void*SysUtil::SysAllocNZ(unsigned int uSize)
 {
 	void *pData = malloc(uSize);
 
@@ -1329,7 +1329,7 @@ void *SysAllocNZ(unsigned int uSize)
 
 void *SysAlloc(unsigned int uSize)
 {
-	void *pData = SysAllocNZ(uSize);
+	void *pData =SysUtil::SysAllocNZ(uSize);
 
 	if (pData != NULL)
 		memset(pData, 0, uSize);
@@ -1337,7 +1337,7 @@ void *SysAlloc(unsigned int uSize)
 	return pData;
 }
 
-void SysFree(void *pData)
+void SysUtil::SysFree(void *pData)
 {
 	free(pData);
 }
@@ -1350,7 +1350,7 @@ void *SysRealloc(void *pData, unsigned int uSize)
 		ErrSetErrorCode(ERR_MEMORY);
 
 	return pNewData;
-}
+}*/
 
 int SysLockFile(char const *pszFileName, char const *pszLockExt)
 {
@@ -1576,7 +1576,7 @@ SYS_HANDLE SysFirstFile(char const *pszPath, char *pszFileName, int iSize)
 		return SYS_INVALID_HANDLE;
 	}
 
-	FileFindData *pFFD = (FileFindData *) SysAlloc(sizeof(FileFindData));
+	FileFindData *pFFD = (FileFindData *)SysUtil::SysAlloc(sizeof(FileFindData));
 
 	if (pFFD == NULL) {
 		FindClose(hFind);
@@ -1625,7 +1625,7 @@ void SysFindClose(SYS_HANDLE hFind)
 
 	if (pFFD != NULL) {
 		FindClose(pFFD->hFind);
-		SysFree(pFFD);
+		SysUtil::SysFree(pFFD);
 	}
 }
 
@@ -1676,7 +1676,7 @@ int SysSetFileModTime(char const *pszFileName, time_t tMod)
 char *SysStrDup(char const *pszString)
 {
 	int iStrLength = strlen(pszString);
-	char *pszBuffer = (char *) SysAllocNZ(iStrLength + 1);
+	char *pszBuffer = (char *)SysUtil::SysAllocNZ(iStrLength + 1);
 
 	if (pszBuffer != NULL)
 		memcpy(pszBuffer, pszString, iStrLength + 1);
@@ -1890,7 +1890,7 @@ SYS_MMAP SysCreateMMap(char const *pszFileName, unsigned long ulFlags)
 		return SYS_INVALID_MMAP;
 	}
 
-	MMapData *pMMD = (MMapData *) SysAlloc(sizeof(MMapData));
+	MMapData *pMMD = (MMapData *)SysUtil::SysAlloc(sizeof(MMapData));
 	SYSTEM_INFO SI;
 
 	if (pMMD == NULL) {
@@ -1920,7 +1920,7 @@ void SysCloseMMap(SYS_MMAP hMap)
 		}
 		CloseHandle(pMMD->hFileMap);
 		CloseHandle(pMMD->hFile);
-		SysFree(pMMD);
+		SysUtil::SysFree(pMMD);
 	}
 }
 

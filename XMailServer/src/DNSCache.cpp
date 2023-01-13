@@ -112,7 +112,7 @@ static char *CDNS_GetCacheFilePath(char const *pszDomain, char const *pszSubDir,
 		    DNS_CACHE_DIRCTORY, pszSubDir, (unsigned int) (ulStringHash % iNumCacheDirs),
 		    pszLwrDomain);
 
-	SysFree(pszLwrDomain);
+SysUtil::SysFree(pszLwrDomain);
 
 	return pszFilePath;
 }

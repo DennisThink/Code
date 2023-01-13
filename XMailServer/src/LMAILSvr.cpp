@@ -66,7 +66,7 @@ static LMAILConfig *LMAILGetConfigCopy(SHB_HANDLE hShbLMAIL)
 	if (pLMAILCfg == NULL)
 		return NULL;
 
-	LMAILConfig *pNewLMAILCfg = (LMAILConfig *) SysAlloc(sizeof(LMAILConfig));
+	LMAILConfig *pNewLMAILCfg = (LMAILConfig *)SysUtil::SysAlloc(sizeof(LMAILConfig));
 
 	if (pNewLMAILCfg != NULL)
 		memcpy(pNewLMAILCfg, pLMAILCfg, sizeof(LMAILConfig));
@@ -419,7 +419,7 @@ static int LMAILProcessList(LMAILConfig *pLMAILCfg, long lThreadId, char const *
 
 	if (pszDefDomain != NULL) {
 		StrSNCpy(szSMTPDomain, pszDefDomain);
-		SysFree(pszDefDomain);
+	SysUtil::SysFree(pszDefDomain);
 	}
 	SvrReleaseConfigHandle(hSvrConfig);
 
@@ -457,20 +457,20 @@ static int LMAILProcessLocalSpool(SHB_HANDLE hShbLMAIL, long lThreadId)
 	if (LMAILGetFilesSnapShot(pLMAILCfg, lThreadId, szSSFileName,
 				  sizeof(szSSFileName)) < 0) {
 		ErrorPush();
-		SysFree(pLMAILCfg);
+	SysUtil::SysFree(pLMAILCfg);
 		return ErrorPop();
 	}
 	if (LMAILProcessList(pLMAILCfg, lThreadId, szSSFileName) < 0) {
 		ErrorPush();
 		SysRemove(szSSFileName);
-		SysFree(pLMAILCfg);
+	SysUtil::SysFree(pLMAILCfg);
 		return ErrorPop();
 	}
 
 	LMAILRemoveProcessed(pLMAILCfg, szSSFileName);
 
 	SysRemove(szSSFileName);
-	SysFree(pLMAILCfg);
+SysUtil::SysFree(pLMAILCfg);
 
 	return 0;
 }

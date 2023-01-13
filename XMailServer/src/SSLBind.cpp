@@ -94,7 +94,7 @@ int BSslInit(void)
 {
 	/*int i, iNumLocks = CRYPTO_num_locks();
 
-	if ((pSslMtxs = (SYS_MUTEX *) SysAlloc(iNumLocks * sizeof(SYS_MUTEX))) == NULL)
+	if ((pSslMtxs = (SYS_MUTEX *)SysUtil::SysAlloc(iNumLocks * sizeof(SYS_MUTEX))) == NULL)
 		return ErrGetErrorCode();
 	for (i = 0; i < iNumLocks; i++) {
 		if ((pSslMtxs[i] = SysCreateMutex()) == SYS_INVALID_MUTEX) {
@@ -237,7 +237,7 @@ static int BSslCtx__Free(void *pPrivate)
 	 * Restore default system blocking mode (-1)
 	 */
 	/*SysBlockSocket(pCtx->SockFD, -1);
-	SysFree(pCtx);*/
+SysUtil::SysFree(pCtx);*/
 
 	return 0;
 }
@@ -306,7 +306,7 @@ static int BSslCtx__SendFile(void *pPrivate, char const *pszFilePath, SYS_OFF_T 
 	/*
 	SslBindCtx *pCtx;
 
-	if ((pCtx = (SslBindCtx *) SysAlloc(sizeof(SslBindCtx))) == NULL)
+	if ((pCtx = (SslBindCtx *)SysUtil::SysAlloc(sizeof(SslBindCtx))) == NULL)
 		return ErrGetErrorCode();
 	pCtx->IOOps.pPrivate = pCtx;
 	pCtx->IOOps.pName = BSslCtx__Name;

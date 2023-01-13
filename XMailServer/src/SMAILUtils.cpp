@@ -179,7 +179,7 @@ void USmlCleanupSpoolFileHeader(SpoolFileHeader &SFH)
 
 static MessageTagData *USmlAllocTag(char const *pszTagName, char const *pszTagData)
 {
-	MessageTagData *pMTD = (MessageTagData *) SysAlloc(sizeof(MessageTagData));
+	MessageTagData *pMTD = (MessageTagData *)SysUtil::SysAlloc(sizeof(MessageTagData));
 
 	if (pMTD == NULL)
 		return NULL;
@@ -193,9 +193,9 @@ static MessageTagData *USmlAllocTag(char const *pszTagName, char const *pszTagDa
 
 static void USmlFreeTag(MessageTagData *pMTD)
 {
-	SysFree(pMTD->pszTagName);
-	SysFree(pMTD->pszTagData);
-	SysFree(pMTD);
+SysUtil::SysFree(pMTD->pszTagName);
+SysUtil::SysFree(pMTD->pszTagData);
+SysUtil::SysFree(pMTD);
 }
 
 static MessageTagData *USmlFindTag(HSLIST &hTagList, char const *pszTagName,
@@ -231,7 +231,7 @@ static int USmlAddTag(HSLIST &hTagList, char const *pszTagName,
 		MessageTagData *pMTD = USmlFindTag(hTagList, pszTagName, TagPosition);
 
 		if (pMTD != NULL) {
-			SysFree(pMTD->pszTagData);
+		SysUtil::SysFree(pMTD->pszTagData);
 
 			pMTD->pszTagData = SysStrDup(pszTagData);
 		} else {
@@ -359,12 +359,12 @@ static void USmlFreeData(SpoolFileData *pSFD)
 	USmlFreeTagsList(pSFD->hTagList);
 	StrFreeStrings(pSFD->ppszInfo);
 	StrFreeStrings(pSFD->ppszFrom);
-	SysFree(pSFD->pszMailFrom);
-	SysFree(pSFD->pszSendMailFrom);
+SysUtil::SysFree(pSFD->pszMailFrom);
+SysUtil::SysFree(pSFD->pszSendMailFrom);
 	StrFreeStrings(pSFD->ppszRcpt);
-	SysFree(pSFD->pszRcptTo);
-	SysFree(pSFD->pszSendRcptTo);
-	SysFree(pSFD->pszRelayDomain);
+SysUtil::SysFree(pSFD->pszRcptTo);
+SysUtil::SysFree(pSFD->pszSendRcptTo);
+SysUtil::SysFree(pSFD->pszRelayDomain);
 }
 
 char *USmlAddrConcat(char const *const *ppszStrings)
@@ -375,7 +375,7 @@ char *USmlAddrConcat(char const *const *ppszStrings)
 	for (i = iSumLength = 0; i < iStrCount; i++)
 		iSumLength += strlen(ppszStrings[i]) + 1;
 
-	char *pszConcat = (char *) SysAlloc(iSumLength + 1);
+	char *pszConcat = (char *)SysUtil::SysAlloc(iSumLength + 1);
 
 	if (pszConcat != NULL) {
 		SetEmptyString(pszConcat);
@@ -407,7 +407,7 @@ char *USmlBuildSendMailFrom(char const *const *ppszFrom, char const *const *ppsz
 	for (i = 0; i < iFromCount; i++)
 		iSumLength += strlen(ppszFrom[i]) + 1;
 
-	char *pszConcat = (char *) SysAlloc(iSumLength + 1);
+	char *pszConcat = (char *)SysUtil::SysAlloc(iSumLength + 1);
 
 	if (pszConcat == NULL)
 		return NULL;
@@ -440,7 +440,7 @@ char *USmlBuildSendRcptTo(char const *const *ppszFrom, char const *const *ppszRc
 	for (i = 1; i < iRcptCount; i++)
 		iSumLength += strlen(ppszRcpt[i]) + 1;
 
-	char *pszConcat = (char *) SysAlloc(iSumLength + 1);
+	char *pszConcat = (char *)SysUtil::SysAlloc(iSumLength + 1);
 
 	if (pszConcat == NULL)
 		return NULL;
@@ -590,7 +590,7 @@ static void USmlInitHandle(SpoolFileData *pSFD)
 static SpoolFileData *USmlAllocEmptyHandle(void)
 {
 	/* Structure allocation and initialization */
-	SpoolFileData *pSFD = (SpoolFileData *) SysAlloc(sizeof(SpoolFileData));
+	SpoolFileData *pSFD = (SpoolFileData *)SysUtil::SysAlloc(sizeof(SpoolFileData));
 
 	if (pSFD != NULL)
 		USmlInitHandle(pSFD);
@@ -608,7 +608,7 @@ SPLF_HANDLE USmlCreateHandle(char const *pszMessFilePath)
 
 	if (USmlLoadHandle(pSFD, pszMessFilePath) < 0) {
 		USmlFreeData(pSFD);
-		SysFree(pSFD);
+	SysUtil::SysFree(pSFD);
 		return INVALID_SPLF_HANDLE;
 	}
 
@@ -620,7 +620,7 @@ void USmlCloseHandle(SPLF_HANDLE hFSpool)
 	SpoolFileData *pSFD = (SpoolFileData *) hFSpool;
 
 	USmlFreeData(pSFD);
-	SysFree(pSFD);
+SysUtil::SysFree(pSFD);
 }
 
 int USmlReloadHandle(SPLF_HANDLE hFSpool)
@@ -636,7 +636,7 @@ int USmlReloadHandle(SPLF_HANDLE hFSpool)
 	if (USmlLoadHandle(pNewSFD, pSFD->szMessFilePath) < 0) {
 		ErrorPush();
 		USmlFreeData(pNewSFD);
-		SysFree(pNewSFD);
+	SysUtil::SysFree(pNewSFD);
 		return ErrorPop();
 	}
 	/* Free the original structure data and load the new one */
@@ -646,7 +646,7 @@ int USmlReloadHandle(SPLF_HANDLE hFSpool)
 
 	/* We don't have to call USmlFreeData() since its content has been tranfered */
 	/* to the original structure to replace the old information */
-	SysFree(pNewSFD);
+SysUtil::SysFree(pNewSFD);
 
 	return 0;
 }
@@ -939,7 +939,7 @@ int USmlSetTagAddress(SPLF_HANDLE hFSpool, char const *pszTagName, char const *p
 			char *pszClose = strrchr(pszOpen + 1, '>');
 
 			if (pszClose == NULL) {
-				SysFree(pszOldAddress);
+			SysUtil::SysFree(pszOldAddress);
 				ErrSetErrorCode(ERR_INVALID_MESSAGE_FORMAT);
 				return ERR_INVALID_MESSAGE_FORMAT;
 			}
@@ -951,7 +951,7 @@ int USmlSetTagAddress(SPLF_HANDLE hFSpool, char const *pszTagName, char const *p
 			StrDynAdd(&DynS, pszAddress);
 			StrDynAdd(&DynS, pszClose);
 
-			SysFree(pszOldAddress);
+		SysUtil::SysFree(pszOldAddress);
 			if (USmlAddTag(pSFD->hTagList, pszTagName, StrDynGet(&DynS), 1) < 0) {
 				ErrorPush();
 				StrDynFree(&DynS);
@@ -960,7 +960,7 @@ int USmlSetTagAddress(SPLF_HANDLE hFSpool, char const *pszTagName, char const *p
 			StrDynFree(&DynS);
 		} else {
 			/* Case : ADDRESS */
-			SysFree(pszOldAddress);
+		SysUtil::SysFree(pszOldAddress);
 			if (USmlAddTag(pSFD->hTagList, pszTagName, pszAddress, 1) < 0)
 				return ErrGetErrorCode();
 		}
@@ -1026,7 +1026,7 @@ int USmlCreateMBFile(UserInfo *pUI, char const *pszFileName, SPLF_HANDLE hFSpool
 				SysSNPrintf(szReturnPath, sizeof(szReturnPath) - 1,
 					    "Return-Path: <%s>", pszRetPath);
 
-				SysFree(pszRetPath);
+			SysUtil::SysFree(pszRetPath);
 			}
 		} else {
 			SysSNPrintf(szReturnPath, sizeof(szReturnPath) - 1,
@@ -1047,7 +1047,7 @@ int USmlCreateMBFile(UserInfo *pUI, char const *pszFileName, SPLF_HANDLE hFSpool
 		UsrGetAddress(pUI, szUserAddress);
 		fprintf(pMBFile, "Delivered-To: %s" SYS_EOL, szUserAddress);
 	} else
-		SysFree(pszReturnPath);
+	SysUtil::SysFree(pszReturnPath);
 
 	/* Write mail file */
 	if (USmlWriteMailFile(hFSpool, pMBFile, true) < 0) {
@@ -1447,7 +1447,7 @@ static int USmlCmd_filter(char **ppszCmdTokens, int iNumTokens, SVRCFG_HANDLE hS
 		else
 			QueCleanupMessage(hQueue, hMessage, false);
 
-		SysFree(pszRejMsg);
+	SysUtil::SysFree(pszRejMsg);
 
 		ErrSetErrorCode(ERR_FILTERED_MESSAGE);
 		return ERR_FILTERED_MESSAGE;
@@ -2546,7 +2546,7 @@ static char **USmlBuildTargetRcptList(char const *pszRcptTo, HSLIST &hTagList,
 				SysSNPrintf(szRecipient, sizeof(szRecipient) - 1, "%s@%s",
 					    szToUser, ppszDomains[0] + 1);
 
-				SysFree(ppszRcptList[i]);
+			SysUtil::SysFree(ppszRcptList[i]);
 
 				ppszRcptList[i] = SysStrDup(szRecipient);
 			}
@@ -2583,7 +2583,7 @@ static char **USmlBuildTargetRcptList(char const *pszRcptTo, HSLIST &hTagList,
 			SysSNPrintf(szRecipient, sizeof(szRecipient) - 1, "%s%s",
 				    ppszRcptList[i], ppszDomains[0] + 1);
 
-			SysFree(ppszRcptList[i]);
+		SysUtil::SysFree(ppszRcptList[i]);
 			ppszRcptList[i] = SysStrDup(szRecipient);
 		}
 		StrFreeStrings(ppszDomains);

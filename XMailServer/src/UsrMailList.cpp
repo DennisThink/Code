@@ -63,7 +63,7 @@ static MLUserInfo *UsrMLGetUserFromStrings(char **ppszStrings)
 	if (iFieldsCount <= mlusrAddress)
 		return NULL;
 
-	MLUserInfo *pMLUI = (MLUserInfo *) SysAlloc(sizeof(MLUserInfo));
+	MLUserInfo *pMLUI = (MLUserInfo *)SysUtil::SysAlloc(sizeof(MLUserInfo));
 
 	if (pMLUI == NULL)
 		return NULL;
@@ -80,7 +80,7 @@ static MLUserInfo *UsrMLGetUserFromStrings(char **ppszStrings)
 
 MLUserInfo *UsrMLAllocDefault(char const *pszAddress, char const *pszPerms)
 {
-	MLUserInfo *pMLUI = (MLUserInfo *) SysAlloc(sizeof(MLUserInfo));
+	MLUserInfo *pMLUI = (MLUserInfo *)SysUtil::SysAlloc(sizeof(MLUserInfo));
 
 	if (pMLUI == NULL)
 		return NULL;
@@ -98,12 +98,12 @@ MLUserInfo *UsrMLAllocDefault(char const *pszAddress, char const *pszPerms)
 int UsrMLFreeUser(MLUserInfo * pMLUI)
 {
 	if (pMLUI->pszPerms != NULL)
-		SysFree(pMLUI->pszPerms);
+	SysUtil::SysFree(pMLUI->pszPerms);
 
 	if (pMLUI->pszAddress != NULL)
-		SysFree(pMLUI->pszAddress);
+	SysUtil::SysFree(pMLUI->pszAddress);
 
-	SysFree(pMLUI);
+SysUtil::SysFree(pMLUI);
 
 	return 0;
 }
@@ -115,7 +115,7 @@ int UsrMLCheckUserPost(UserInfo * pUI, char const *pszUser, char const *pszLogon
 	if (pszClosed != NULL) {
 		int iClosedML = atoi(pszClosed);
 
-		SysFree(pszClosed);
+	SysUtil::SysFree(pszClosed);
 
 		if (iClosedML) {
 			USRML_HANDLE hUsersDB = UsrMLOpenDB(pUI);
@@ -167,7 +167,7 @@ static int UsrMLWriteUser(FILE * pMLUFile, MLUserInfo const *pMLUI)
 
 	fprintf(pMLUFile, "%s\n", pszQuoted);
 
-	SysFree(pszQuoted);
+SysUtil::SysFree(pszQuoted);
 
 	return 0;
 }
@@ -340,7 +340,7 @@ int UsrMLGetUsersFileSnapShot(UserInfo * pUI, const char *pszFileName)
 
 USRML_HANDLE UsrMLOpenDB(UserInfo * pUI)
 {
-	MLUsersScanData *pMLUSD = (MLUsersScanData *) SysAlloc(sizeof(MLUsersScanData));
+	MLUsersScanData *pMLUSD = (MLUsersScanData *)SysUtil::SysAlloc(sizeof(MLUsersScanData));
 
 	if (pMLUSD == NULL)
 		return INVALID_USRML_HANDLE;
@@ -348,13 +348,13 @@ USRML_HANDLE UsrMLOpenDB(UserInfo * pUI)
 	UsrGetTmpFile(NULL, pMLUSD->szTmpDBFile, sizeof(pMLUSD->szTmpDBFile));
 
 	if (UsrMLGetUsersFileSnapShot(pUI, pMLUSD->szTmpDBFile) < 0) {
-		SysFree(pMLUSD);
+	SysUtil::SysFree(pMLUSD);
 		return INVALID_USRML_HANDLE;
 	}
 
 	if ((pMLUSD->pDBFile = fopen(pMLUSD->szTmpDBFile, "rt")) == NULL) {
 		SysRemove(pMLUSD->szTmpDBFile);
-		SysFree(pMLUSD);
+	SysUtil::SysFree(pMLUSD);
 		return INVALID_USRML_HANDLE;
 	}
 
@@ -369,7 +369,7 @@ void UsrMLCloseDB(USRML_HANDLE hUsersDB)
 
 	SysRemove(pMLUSD->szTmpDBFile);
 
-	SysFree(pMLUSD);
+SysUtil::SysFree(pMLUSD);
 
 }
 

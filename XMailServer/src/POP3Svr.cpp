@@ -82,7 +82,7 @@ static POP3Config *POP3GetConfigCopy(SHB_HANDLE hShbPOP3)
 	if (pPOP3Cfg == NULL)
 		return NULL;
 
-	POP3Config *pPOP3CfgCopy = (POP3Config *) SysAlloc(sizeof(POP3Config));
+	POP3Config *pPOP3CfgCopy = (POP3Config *)SysUtil::SysAlloc(sizeof(POP3Config));
 
 	if (pPOP3CfgCopy != NULL)
 		memcpy(pPOP3CfgCopy, pPOP3Cfg, sizeof(POP3Config));
@@ -201,7 +201,7 @@ static int POP3InitSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock,
 
 	if (pszDefDomain != NULL) {
 		StrSNCpy(POP3S.szSvrDomain, pszDefDomain);
-		SysFree(pszDefDomain);
+	SysUtil::SysFree(pszDefDomain);
 	}
 	/* As a last tentative We try to get "RootDomain" to set POP3 domain */
 	if (IsEmptyString(POP3S.szSvrDomain)) {
@@ -213,7 +213,7 @@ static int POP3InitSession(ThreadConfig const *pThCfg, BSOCK_HANDLE hBSock,
 			return ERR_NO_DOMAIN;
 		}
 		StrSNCpy(POP3S.szSvrDomain, pszRootDomain);
-		SysFree(pszRootDomain);
+	SysUtil::SysFree(pszRootDomain);
 	}
 	if ((POP3S.pPOP3Cfg = POP3GetConfigCopy(POP3S.pThCfg->hThShb)) == NULL) {
 		SvrReleaseConfigHandle(POP3S.hSvrConfig);
@@ -263,7 +263,7 @@ static int POP3LogSession(POP3Session &POP3S, char const *pszStatus,
 		   pszPassword, pszStatus, pszExtra != NULL ? pszExtra: "");
 
 	RLckUnlockEX(hResLock);
-	SysFree(pszExtra);
+SysUtil::SysFree(pszExtra);
 
 	return 0;
 }
@@ -951,7 +951,7 @@ unsigned int POP3ClientThread(void *pThreadData)
 	if (hBSock == INVALID_BSOCK_HANDLE) {
 		ErrorPush();
 		SysCloseSocket(pThCtx->SockFD);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -966,7 +966,7 @@ unsigned int POP3ClientThread(void *pThreadData)
 		if (CSslBindSetup(&SSLB) < 0) {
 			ErrorPush();
 			BSckDetach(hBSock, 1);
-			SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 			return ErrorPop();
 		}
 		ZeroData(SslE);
@@ -977,15 +977,15 @@ unsigned int POP3ClientThread(void *pThreadData)
 		if (iError < 0) {
 			ErrorPush();
 			BSckDetach(hBSock, 1);
-			SysFree(pThCtx);
+		SysUtil::SysFree(pThCtx);
 			return ErrorPop();
 		}
 		/*
 		 * We may want to add verify code here ...
 		 */
 
-		SysFree(SslE.pszIssuer);
-		SysFree(SslE.pszSubject);
+	SysUtil::SysFree(SslE.pszIssuer);
+	SysUtil::SysFree(SslE.pszSubject);
 	}
 
 	/* Check IP permission */
@@ -995,7 +995,7 @@ unsigned int POP3ClientThread(void *pThreadData)
 		UPopSendErrorResponse(hBSock, ErrGetErrorCode(), STD_POP3_TIMEOUT);
 
 		BSckDetach(hBSock, 1);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -1007,7 +1007,7 @@ unsigned int POP3ClientThread(void *pThreadData)
 		UPopSendErrorResponse(hBSock, ErrGetErrorCode(), STD_POP3_TIMEOUT);
 
 		BSckDetach(hBSock, 1);
-		SysFree(pThCtx);
+	SysUtil::SysFree(pThCtx);
 		return ErrorPop();
 	}
 
@@ -1019,7 +1019,7 @@ unsigned int POP3ClientThread(void *pThreadData)
 
 	/* Unlink socket from the bufferer and close it */
 	BSckDetach(hBSock, 1);
-	SysFree(pThCtx);
+SysUtil::SysFree(pThCtx);
 
 	return 0;
 }

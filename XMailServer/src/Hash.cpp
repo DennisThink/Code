@@ -40,15 +40,15 @@ HASH_HANDLE HashCreate(HashOps const *pOps, unsigned long ulSize)
 	unsigned long i, ulHMask;
 	Hash *pHash;
 
-	if ((pHash = (Hash *) SysAlloc(sizeof(Hash))) == NULL)
+	if ((pHash = (Hash *)SysUtil::SysAlloc(sizeof(Hash))) == NULL)
 		return INVALID_HASH_HANDLE;
 	pHash->Ops = *pOps;
 	for (ulHMask = 2; !(ulHMask & HMASK_TOP_BIT) && ulHMask <= ulSize; ulHMask <<= 1);
 	ulHMask--;
 	pHash->ulHMask = ulHMask;
 	if ((pHash->pBkts = (SysListHead *)
-	     SysAlloc((ulHMask + 1) * sizeof(SysListHead))) == NULL) {
-		SysFree(pHash);
+	    SysUtil::SysAlloc((ulHMask + 1) * sizeof(SysListHead))) == NULL) {
+	SysUtil::SysFree(pHash);
 		return INVALID_HASH_HANDLE;
 	}
 	for (i = 0; i <= ulHMask; i++)
@@ -76,8 +76,8 @@ void HashFree(HASH_HANDLE hHash, void (*pFree)(void *, HashNode *),
 				}
 			}
 		}
-		SysFree(pHash->pBkts);
-		SysFree(pHash);
+	SysUtil::SysFree(pHash->pBkts);
+	SysUtil::SysFree(pHash);
 	}
 }
 
@@ -105,7 +105,7 @@ static int HashGrow(Hash *pHash)
 		return 0;
 	ulHMask = (ulHMask << 1) - 1;
 	if ((pBkts = (SysListHead *)
-	     SysAlloc((ulHMask + 1) * sizeof(SysListHead))) == NULL)
+	    SysUtil::SysAlloc((ulHMask + 1) * sizeof(SysListHead))) == NULL)
 		return ErrGetErrorCode();
 	for (i = 0; i <= ulHMask; i++)
 		SYS_INIT_LIST_HEAD(&pBkts[i]);
@@ -119,7 +119,7 @@ static int HashGrow(Hash *pHash)
 			SYS_LIST_ADDT(&pHNode->Lnk, &pBkts[ulHIdx]);
 		}
 	}
-	SysFree(pHash->pBkts);
+SysUtil::SysFree(pHash->pBkts);
 	pHash->pBkts = pBkts;
 	pHash->ulHMask = ulHMask;
 

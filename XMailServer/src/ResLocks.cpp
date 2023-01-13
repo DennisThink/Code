@@ -73,7 +73,7 @@ int RLckInitLockers(void)
 		    SYS_INVALID_SEMAPHORE) {
 			ErrorPush();
 			for (--i; i >= 0; i--) {
-				SysFree(RLGates[i].pResList);
+			SysUtil::SysFree(RLGates[i].pResList);
 				SysCloseSemaphore(RLGates[i].hSemaphore);
 			}
 			SysCloseMutex(hRLMutex);
@@ -84,11 +84,11 @@ int RLckInitLockers(void)
 		RLGates[i].iHashSize = STD_RES_HASH_SIZE;
 
 		if ((RLGates[i].pResList = (SysListHead *)
-		     SysAlloc(RLGates[i].iHashSize * sizeof(SysListHead))) == NULL) {
+		    SysUtil::SysAlloc(RLGates[i].iHashSize * sizeof(SysListHead))) == NULL) {
 			ErrorPush();
 			SysCloseSemaphore(RLGates[i].hSemaphore);
 			for (--i; i >= 0; i--) {
-				SysFree(RLGates[i].pResList);
+			SysUtil::SysFree(RLGates[i].pResList);
 				SysCloseSemaphore(RLGates[i].hSemaphore);
 			}
 			SysCloseMutex(hRLMutex);
@@ -103,7 +103,7 @@ int RLckInitLockers(void)
 
 static int RLckFreeEntry(ResLockEntry * pRLE)
 {
-	SysFree(pRLE);
+SysUtil::SysFree(pRLE);
 
 	return 0;
 }
@@ -124,7 +124,7 @@ int RLckCleanupLockers(void)
 				RLckFreeEntry(pRLE);
 			}
 		}
-		SysFree(RLGates[i].pResList);
+	SysUtil::SysFree(RLGates[i].pResList);
 		SysCloseSemaphore(RLGates[i].hSemaphore);
 	}
 	SysUnlockMutex(hRLMutex);
@@ -196,7 +196,7 @@ static int RLckRemoveEntry(ResLocator const *pRL, ResLockEntry * pRLE)
 
 static ResLockEntry *RLckAllocEntry(char const *pszResourceName)
 {
-	ResLockEntry *pRLE = (ResLockEntry *) SysAlloc(sizeof(ResLockEntry) +
+	ResLockEntry *pRLE = (ResLockEntry *)SysUtil::SysAlloc(sizeof(ResLockEntry) +
 						       strlen(pszResourceName));
 
 	if (pRLE == NULL)
@@ -351,11 +351,11 @@ static int RLckUnlock(RLCK_HANDLE hLock,
 	if ((*pUnlockProc)(&RL, pszResourceName) < 0) {
 		ErrorPush();
 		SysUnlockMutex(hRLMutex);
-		SysFree(pszResourceName);
+	SysUtil::SysFree(pszResourceName);
 		return ErrorPop();
 	}
 	SysUnlockMutex(hRLMutex);
-	SysFree(pszResourceName);
+SysUtil::SysFree(pszResourceName);
 
 	return 0;
 }
