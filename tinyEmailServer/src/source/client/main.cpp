@@ -17,12 +17,12 @@ int main(int argc,char * argv[])
     asio::io_context service;
     InitLog();
     {
-        //auto client = std::make_shared<cpp_email::CEmailClient>(service, g_console, "test@163.com", "test");
+        //auto client = std::make_shared<cpp_email::CEmailClient>(service, g_console, "111@163.com", "111");
         //client->Start();
         //service.run();
     }
     {
-        auto client = std::make_shared<cpp_email::CEmailClient>(service, g_console, "test@qq.com", "test");
+        //auto client = std::make_shared<cpp_email::CEmailClient>(service, g_console, "111@qq.com", "111");
         client->Start();
         service.run();
     }

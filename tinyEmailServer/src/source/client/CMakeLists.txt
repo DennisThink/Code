@@ -19,7 +19,7 @@ else()
 link_libraries(pthread)
 endif()
 SET(C_TCP_CLIENT ${INC_BASE}/network/tcpClient/CTcpClient.h ${INC_BASE}/network/tcpClient/CTcpClient.cpp)
-SET(C_EMAIL    CEmailClient.h CEmailClient.cpp)
+SET(C_EMAIL CEmailClient.h CEmailClient.cpp CSmtpClient.h CSmtpClient.cpp)
 
 SET(PROTO_FILE 
 ${INC_BASE}/common/util/ProtoUtil.cpp
